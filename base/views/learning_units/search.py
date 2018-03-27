@@ -174,9 +174,19 @@ def _force_state(formset, request):
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
 def learning_units_summary_list(request):
+    search_form = LearningUnitYearForm(request.GET or None)
     a_person = find_by_user(request.user)
-    learning_units_found = get_learning_units_and_summary_status(a_person, current_academic_year())
+    learning_units_found = []
+
+    try:
+        if search_form.is_valid():
+            learning_units_found = get_learning_units_and_summary_status(a_person, current_academic_year())
+
+    except TooManyResultsException:
+        display_error_messages(request, 'too_many_results')
+
     context = {
+        'form': search_form,
         'learning_units': sorted(learning_units_found, key=lambda t: t.acronym),
         'experimental_phase': True,
         'search_type': SUMMARY_LIST,

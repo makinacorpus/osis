@@ -37,7 +37,7 @@ class SearchForm(forms.Form):
     ALL_CHOICES = (ALL_LABEL,)
 
     academic_year_id = forms.ModelChoiceField(
-        label=_('academic_year_small'),
+        label=_('academic_year'),
         queryset=AcademicYear.objects.all(),
         empty_label=_('all_label'),
         required=False,
@@ -58,7 +58,14 @@ class SearchForm(forms.Form):
     tutor = forms.CharField(
         max_length=20,
         required=False,
-        label=_('tutor'))
+        label=_('tutor')
+    )
+
+    summary_responsible = forms.CharField(
+        max_length=20,
+        required=False,
+        label=_('summary_responsible')
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

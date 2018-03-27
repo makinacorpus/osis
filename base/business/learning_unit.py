@@ -317,19 +317,6 @@ def _get_entities(entity_components_yr):
             if e.entity_container_year.type in additional_requirement_entities_types}
 
 
-def get_list_entity_learning_unit_yr(an_entity_version, current_academic_yr):
-    entity_ids = get_entities_ids(an_entity_version.entity.most_recent_acronym, False)
-    entities_id_list = get_entity_container_list([], entity_ids, entity_container_year_link_type.REQUIREMENT_ENTITY)
-
-    return learning_unit_year.search(**{'learning_container_year_id': entities_id_list,
-                                        'academic_year_id': current_academic_yr,
-                                        'status': True}) \
-        .select_related('academic_year', 'learning_container_year',
-                        'learning_container_year__academic_year') \
-        .prefetch_related(build_entity_container_prefetch()) \
-        .order_by('academic_year__year', 'acronym')
-
-
 def get_learning_units_and_summary_status(a_person, academic_yr):
     entities_version_attached = a_person.find_main_entities_version
     learning_units_found = []
@@ -347,6 +334,19 @@ def _get_learning_unit_by_entity(academic_yr, an_entity_version, cms_list):
         if entity_learning_unit_yr_list:
             return _get_summary_detail(a_calendar, cms_list, entity_learning_unit_yr_list)
     return []
+
+
+def get_list_entity_learning_unit_yr(an_entity_version, current_academic_yr):
+    entity_ids = get_entities_ids(an_entity_version.entity.most_recent_acronym, False)
+    entities_id_list = get_entity_container_list([], entity_ids, entity_container_year_link_type.REQUIREMENT_ENTITY)
+
+    return learning_unit_year.search(**{'learning_container_year_id': entities_id_list,
+                                        'academic_year_id': current_academic_yr,
+                                        'status': True}) \
+        .select_related('academic_year', 'learning_container_year',
+                        'learning_container_year__academic_year') \
+        .prefetch_related(build_entity_container_prefetch()) \
+        .order_by('academic_year__year', 'acronym')
 
 
 def _get_summary_status(a_calendar, cms_list, lu):
