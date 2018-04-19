@@ -86,9 +86,11 @@ def find_by_parent(an_education_group_year):
     return GroupElementYear.objects.filter(parent=an_education_group_year)
 
 
-def find_learning_unit_formation_roots(obj):
-    filters = _get_root_filters()
-    return _find_related_root_education_groups([obj], filters=filters)
+def find_learning_unit_formation_roots(objects):
+    if objects:
+        filters = _get_root_filters()
+        return _find_related_root_education_groups(objects, filters=filters)
+    return {}
 
 
 def _get_root_filters():

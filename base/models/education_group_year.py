@@ -97,7 +97,6 @@ class EducationGroupYear(models.Model):
                                      blank=True, null=True)
     enrollment_enabled = models.BooleanField(default=False)
     partial_acronym = models.CharField(max_length=15, db_index=True, null=True)
-    credits = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
     remark_english = models.TextField(blank=True, null=True)
 

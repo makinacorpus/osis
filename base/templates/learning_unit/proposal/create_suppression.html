@@ -13,7 +13,7 @@
 
 {% block panel_proposal %}
     {% with form_proposal as form %}
-        {% include 'learning_unit/blocks/form/create_proposal.html' %}
+        {% include 'learning_unit/blocks/form/update_proposal.html' %}
     {% endwith %}
     {% buttons %}
         <a href="{% url 'learning_unit' learning_unit_year_id=learning_unit_year.id %}" class="btn btn-default">

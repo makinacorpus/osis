@@ -30,14 +30,12 @@ from django import forms
 from django.db import transaction
 
 from base.business.learning_unit_proposal import reinitialize_data_before_proposal, compute_proposal_type, \
-    compute_proposal_state
+    compute_proposal_state, _copy_learning_unit_data
 from base.forms.learning_unit.learning_unit_create import EntitiesVersionChoiceField
 from base.forms.learning_unit.learning_unit_create_2 import FullForm, PartimForm
-from base.models import entity_container_year
 from base.models.academic_year import current_academic_year
 from base.models.entity_version import find_main_entities_version, get_last_version
 from base.models.enums import learning_unit_year_subtypes
-from base.models.enums.entity_container_year_link_type import ENTITY_TYPE_LIST
 from base.models.enums.proposal_type import ProposalType
 from base.models.learning_unit_year import get_by_id
 from base.models.proposal_learning_unit import ProposalLearningUnit
@@ -48,7 +46,7 @@ class ProposalLearningUnitForm(forms.ModelForm):
     entity = EntitiesVersionChoiceField(queryset=find_main_entities_version())
 
     def __init__(self, data, person, *args, initial=None, **kwargs):
-        super().__init__(data, *args, **kwargs)
+        super().__init__(data, *args, initial=initial, **kwargs)
 
         if initial:
             for key, value in initial.items():
@@ -126,9 +124,10 @@ class ProposalBaseForm:
 
     @transaction.atomic
     def save(self):
-        proposal = self.form_proposal.save(False)
-        proposal.type = compute_proposal_type(self.learning_unit_form_container.cleaned_data, proposal.initial_data)
         proposal = self.form_proposal.save()
+        # Update the type when initial_data has been set
+        proposal.type = compute_proposal_type(proposal)
+        proposal.save()
 
         self.learning_unit_form_container.save()
         return proposal
@@ -167,53 +166,3 @@ class CreationProposalBaseForm(ProposalBaseForm):
         new_luys = self.learning_unit_form_container.save(postponement=False)
         self.form_proposal.instance.learning_unit_year = new_luys[0]
         return self.form_proposal.save()
-
-
-def _copy_learning_unit_data(learning_unit_year):
-    learning_container_year = learning_unit_year.learning_container_year
-    entities_by_type = entity_container_year.find_entities_grouped_by_linktype(learning_container_year)
-
-    learning_container_year_values = _get_attributes_values(learning_container_year,
-                                                            ["id", "acronym", "common_title", "common_title_english",
-                                                             "container_type",
-                                                             "campus__id", "language__pk", "in_charge"])
-    learning_unit_values = _get_attributes_values(learning_unit_year.learning_unit, ["id", "periodicity", "end_year"])
-    learning_unit_year_values = _get_attributes_values(learning_unit_year, ["id", "acronym", "specific_title",
-                                                                            "specific_title_english",
-                                                                            "internship_subtype", "quadrimester",
-                                                                            "status"])
-    learning_unit_year_values["credits"] = float(learning_unit_year.credits) if learning_unit_year.credits else None
-    return get_initial_data(entities_by_type, learning_container_year_values, learning_unit_values,
-                            learning_unit_year_values)
-
-
-def _get_attributes_values(obj, attributes_name):
-    attributes_values = {}
-    for attribute_name in attributes_name:
-        attributes_hierarchy = attribute_name.split("__")
-        value = getattr(obj, attributes_hierarchy[0], None)
-        if len(attributes_hierarchy) > 1:
-            value = getattr(value, attributes_hierarchy[1], None)
-        attributes_values[attributes_hierarchy[0]] = value
-    return attributes_values
-
-
-def get_initial_data(entities_by_type, learning_container_year_values, learning_unit_values, learning_unit_year_values):
-    initial_data = {
-        "learning_container_year": learning_container_year_values,
-        "learning_unit_year": learning_unit_year_values,
-        "learning_unit": learning_unit_values,
-        "entities": get_entities(entities_by_type)
-    }
-    return initial_data
-
-
-def get_entities(entities_by_type):
-    return {entity_type: get_entity_by_type(entity_type, entities_by_type) for entity_type in ENTITY_TYPE_LIST}
-
-
-def get_entity_by_type(entity_type, entities_by_type):
-    if entities_by_type.get(entity_type):
-        return entities_by_type[entity_type].id
-    else:
-        return None

@@ -23,8 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.apps import apps
+
 from django.contrib.messages import ERROR, SUCCESS
+from django.forms import model_to_dict
 from django.utils.translation import ugettext_lazy as _
 
 from base import models as mdl_base
@@ -33,7 +34,8 @@ from base.business.learning_units.edition import update_or_create_entity_contain
 from base.business.learning_units.perms import PROPOSAL_CONSOLIDATION_ELIGIBLE_STATES
 from base.business.learning_units.simple import deletion as business_deletion, deletion
 from base.models import entity_container_year, campus, entity
-from base.models.enums import entity_container_year_link_type, proposal_state, proposal_type
+from base.models.enums import proposal_state, proposal_type
+from base.models.enums.entity_container_year_link_type import ENTITY_TYPE_LIST
 from base.models.enums.proposal_type import ProposalType
 from base.utils import send_mail as send_mail_util
 from reference.models import language
@@ -47,26 +49,17 @@ LABEL_ACTIVE = _('active')
 LABEL_INACTIVE = _('inactive')
 
 
-def compute_proposal_type(data_changed, initial_proposal_type):
-    if initial_proposal_type in [ProposalType.CREATION.name, ProposalType.SUPPRESSION.name]:
-        return initial_proposal_type
+def compute_proposal_type(proposal_learning_unit_year):
+    if proposal_learning_unit_year.type in [ProposalType.CREATION.name, ProposalType.SUPPRESSION.name]:
+        return proposal_learning_unit_year.type
 
-    is_transformation = any(map(_is_transformation_field, data_changed))
-    is_modification = any(map(_is_modification_field, data_changed))
-    if is_transformation:
-        if is_modification:
-            return ProposalType.TRANSFORMATION_AND_MODIFICATION.name
-        else:
-            return ProposalType.TRANSFORMATION.name
-    return ProposalType.MODIFICATION.name
-
-
-def _is_transformation_field(field):
-    return field == "acronym"
-
-
-def _is_modification_field(field):
-    return not _is_transformation_field(field)
+    differences = get_difference_of_proposal(proposal_learning_unit_year)
+    if differences.get('acronym') and len(differences) == 1:
+        return ProposalType.TRANSFORMATION.name
+    elif differences.get('acronym'):
+        return ProposalType.TRANSFORMATION_AND_MODIFICATION.name
+    else:
+        return ProposalType.MODIFICATION.name
 
 
 def reinitialize_data_before_proposal(learning_unit_proposal):
@@ -118,84 +111,22 @@ def delete_learning_unit_proposal(learning_unit_proposal):
 
 
 def get_difference_of_proposal(learning_unit_yr_proposal):
+    initial_data = learning_unit_yr_proposal.initial_data
+    actual_data = _copy_learning_unit_data(learning_unit_yr_proposal.learning_unit_year)
     differences = {}
-    if learning_unit_yr_proposal and learning_unit_yr_proposal.initial_data.get('learning_container_year'):
-        differences.update(_get_differences_in_learning_unit_data(learning_unit_yr_proposal))
-        learning_container_yr = mdl_base.learning_container_year \
-            .find_by_id(learning_unit_yr_proposal.initial_data.get('learning_container_year').get('id'))
-        if learning_container_yr:
-            differences.update(_get_difference_of_entity_proposal(learning_container_yr, learning_unit_yr_proposal))
+    for model in ['learning_unit', 'learning_unit_year', 'learning_container_year', 'entities']:
+        initial_data_by_model = initial_data.get(model)
+        if not initial_data_by_model:
+            continue
 
-    return differences
-
-
-def _get_difference_of_entity_proposal(learning_container_yr, learning_unit_yr_proposal):
-    differences = {}
-    for entity_type, initial_entity_id in learning_unit_yr_proposal.initial_data.get('entities').items():
-        entity_cont_yr = mdl_base.entity_container_year \
-            .find_by_learning_container_year_and_linktype(learning_container_yr, entity_type)
-        if entity_cont_yr:
-            differences.update(_get_entity_old_value(entity_cont_yr, initial_entity_id, entity_type))
-        elif initial_entity_id:
-            differences.update(_get_entity_previous_value(initial_entity_id, entity_type))
-    return differences
-
-
-def _get_entity_old_value(entity_cont_yr, initial_entity_id, entity_type):
-    differences = {}
-    if _has_changed_entity(entity_cont_yr, initial_entity_id):
-        differences.update(_get_entity_previous_value(initial_entity_id, entity_type))
-    elif not initial_entity_id and entity_type in (entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_1,
-                                                   entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_2):
-            differences.update({entity_type: NO_PREVIOUS_VALUE})
-    return differences
-
-
-def _has_changed_entity(entity_cont_yr, entity_id):
-    return entity_id and entity_cont_yr.entity.id != entity_id
-
-
-def _get_differences_in_learning_unit_data(proposal):
-    learning_unit_yr_initial_data = _get_data_dict('learning_unit_year', proposal.initial_data)
-    learning_container_yr_initial_data = _get_data_dict('learning_container_year', proposal.initial_data)
-    initial_learning_container_yr_id = _get_data_dict('id', learning_container_yr_initial_data)
-    learning_unit_initial_data = _get_data_dict('learning_unit', proposal.initial_data)
-
-    differences = {}
-    differences.update(_compare_model_with_initial_value(proposal.learning_unit_year.id,
-                                                         learning_unit_yr_initial_data,
-                                                         apps.get_model(app_label=APP_BASE_LABEL,
-                                                                        model_name="LearningUnitYear")))
-    if initial_learning_container_yr_id:
-        differences.update(_compare_model_with_initial_value(initial_learning_container_yr_id,
-                                                             learning_container_yr_initial_data,
-                                                             apps.get_model(app_label=APP_BASE_LABEL,
-                                                                            model_name="LearningContainerYear")))
-    if learning_unit_initial_data:
-        differences.update(_compare_model_with_initial_value(learning_unit_initial_data.get('id'),
-                                                             learning_unit_initial_data,
-                                                             apps.get_model(app_label=APP_BASE_LABEL,
-                                                                            model_name="LearningUnit")))
-    return differences
-
-
-def _compare_model_with_initial_value(an_id, model_initial_data, mymodel):
-    differences = {}
-    qs = mymodel.objects.filter(pk=an_id).values()
-    if len(qs) > 0:
-        differences.update(_check_differences(_get_rid_of_blank_value(model_initial_data),
-                                              _get_rid_of_blank_value(qs[0])))
+        differences.update(
+            {key: initial_data_by_model[key] for key, value in initial_data_by_model.items()
+             if value != actual_data[model][key]})
     return differences
 
 
 def _replace_key_of_foreign_key(data):
     return {key_name.replace(END_FOREIGN_KEY_NAME, ''): data[key_name] for key_name in data.keys()}
-
-
-def _check_differences(initial_data, current_data):
-    if initial_data:
-        return _compare_initial_current_data(current_data, initial_data)
-    return {}
 
 
 def _compare_initial_current_data(current_data, initial_data):
@@ -237,20 +168,6 @@ def _is_foreign_key(key, current_data):
     return "{}{}".format(key, END_FOREIGN_KEY_NAME) in current_data
 
 
-def _get_entity_previous_value(entity_id, entity_type):
-    if entity_id:
-        old_value = entity.find_by_id(entity_id)
-        if old_value:
-            return {entity_type: old_value.most_recent_acronym}
-    return {entity_type: _('entity_not_found')}
-
-
-def _get_data_dict(key, initial_data):
-    if initial_data:
-        return initial_data.get(key) if initial_data.get(key) else None
-    return None
-
-
 def _get_status_initial_value(initial_value, key):
     return {key: LABEL_ACTIVE} if initial_value else {key: LABEL_INACTIVE}
 
@@ -262,14 +179,6 @@ def _get_old_value_when_not_foreign_key(initial_value, key):
         return _get_status_initial_value(initial_value, key)
     else:
         return {key: "{}".format(initial_value)}
-
-
-def _get_rid_of_blank_value(data):
-    clean_data = data.copy()
-    for key, value in clean_data.items():
-        if value == '':
-            clean_data[key] = None
-    return clean_data
 
 
 def cancel_proposals(proposals, author):
@@ -369,3 +278,45 @@ def _consolidate_creation_proposal_of_state_refused(proposal):
 def compute_proposal_state(a_person):
     return proposal_state.ProposalState.CENTRAL.name if a_person.is_central_manager() \
         else proposal_state.ProposalState.FACULTY.name
+
+
+def _copy_learning_unit_data(learning_unit_year):
+    learning_container_year = learning_unit_year.learning_container_year
+    entities_by_type = entity_container_year.find_entities_grouped_by_linktype(learning_container_year)
+
+    learning_container_year_values = _get_attributes_values(learning_container_year,
+                                                            ["id", "acronym", "common_title", "common_title_english",
+                                                             "container_type", "campus", "language", "in_charge"])
+    learning_unit_values = _get_attributes_values(learning_unit_year.learning_unit, ["id", "periodicity", "end_year"])
+    learning_unit_year_values = _get_attributes_values(learning_unit_year, ["id", "acronym", "specific_title",
+                                                                            "specific_title_english",
+                                                                            "internship_subtype", "quadrimester",
+                                                                            "status"])
+    learning_unit_year_values["credits"] = float(learning_unit_year.credits) if learning_unit_year.credits else None
+    return get_initial_data(entities_by_type, learning_container_year_values, learning_unit_values,
+                            learning_unit_year_values)
+
+
+def _get_attributes_values(obj, attributes_name):
+    return model_to_dict(obj, fields=attributes_name)
+
+
+def get_initial_data(entities_by_type, learning_container_year_values, learning_unit_values, learning_unit_year_values):
+    initial_data = {
+        "learning_container_year": learning_container_year_values,
+        "learning_unit_year": learning_unit_year_values,
+        "learning_unit": learning_unit_values,
+        "entities": get_entities(entities_by_type)
+    }
+    return initial_data
+
+
+def get_entities(entities_by_type):
+    return {entity_type: get_entity_by_type(entity_type, entities_by_type) for entity_type in ENTITY_TYPE_LIST}
+
+
+def get_entity_by_type(entity_type, entities_by_type):
+    if entities_by_type.get(entity_type):
+        return entities_by_type[entity_type].id
+    else:
+        return None

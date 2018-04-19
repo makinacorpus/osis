@@ -46,8 +46,7 @@ from base.views.learning_units import perms
 @permission_required('base.can_propose_learningunit', raise_exception=True)
 def learning_unit_modification_proposal(request, learning_unit_year_id):
     learning_unit_year = get_object_or_404(LearningUnitYear, id=learning_unit_year_id)
-    user_person = get_object_or_404(Person, user=request.user)
-    return _update_or_create_proposal(request, user_person, learning_unit_year)
+    return _update_or_create_proposal(request, learning_unit_year)
 
 
 @login_required
@@ -55,23 +54,23 @@ def learning_unit_modification_proposal(request, learning_unit_year_id):
 @permission_required('base.can_propose_learningunit', raise_exception=True)
 def learning_unit_suppression_proposal(request, learning_unit_year_id):
     learning_unit_year = get_object_or_404(LearningUnitYear, id=learning_unit_year_id)
-    user_person = get_object_or_404(Person, user=request.user)
-    return _update_or_create_suppression_proposal(request, user_person, learning_unit_year)
+    return _update_or_create_suppression_proposal(request, learning_unit_year)
 
 
 @login_required
 @perms.can_edit_learning_unit_proposal
 def update_learning_unit_proposal(request, learning_unit_year_id):
-    user_person = get_object_or_404(Person, user=request.user)
     proposal = get_object_or_404(ProposalLearningUnit, learning_unit_year=learning_unit_year_id)
 
     if proposal.type == ProposalType.SUPPRESSION.name:
-        return _update_or_create_suppression_proposal(request, user_person, proposal.learning_unit_year, proposal)
+        return _update_or_create_suppression_proposal(request, proposal.learning_unit_year, proposal)
     else:
-        return _update_or_create_proposal(request, user_person, proposal.learning_unit_year, proposal)
+        return _update_or_create_proposal(request, proposal.learning_unit_year, proposal)
 
 
-def _update_or_create_proposal(request, person, learning_unit_year, proposal=None):
+def _update_or_create_proposal(request, learning_unit_year, proposal=None):
+    person = get_object_or_404(Person, user=request.user)
+
     proposal_base_form = ProposalBaseForm(request.POST or None, person, learning_unit_year, proposal)
 
     if proposal_base_form.is_valid():
@@ -86,7 +85,9 @@ def _update_or_create_proposal(request, person, learning_unit_year, proposal=Non
     return layout.render(request, 'learning_unit/proposal/create_modification.html', context)
 
 
-def _update_or_create_suppression_proposal(request, person, learning_unit_year, proposal=None):
+def _update_or_create_suppression_proposal(request, learning_unit_year, proposal=None):
+    person = get_object_or_404(Person, user=request.user)
+
     proposal_type = ProposalType.SUPPRESSION.name
     initial = _get_initial(learning_unit_year, proposal, person, proposal_type=proposal_type)
 

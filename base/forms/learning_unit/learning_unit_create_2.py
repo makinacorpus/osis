@@ -42,7 +42,7 @@ from base.models.enums.learning_container_year_types import LEARNING_CONTAINER_Y
 from base.models.learning_unit_year import LearningUnitYear
 from reference.models import language
 
-FULL_READ_ONLY_FIELDS = {"first_letter", "acronym", "academic_year", "container_type", "subtype"}
+FULL_READ_ONLY_FIELDS = {"acronym_0", "acronym_1", "academic_year", "container_type", "subtype"}
 
 PARTIM_FORM_READ_ONLY_FIELD = {'acronym_0', 'acronym_1', 'common_title', 'common_title_english',
                                'requirement_entity', 'allocation_entity', 'language', 'periodicity', 'campus',

@@ -25,8 +25,6 @@
     * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% include 'learning_unit/blocks/achievement_titles.html' %}
-
 <div class="row" style="margin-top:10px;">
     <div class="col-md-2">
         <label>{% trans 'learning_achievements' %}</label>
@@ -34,14 +32,38 @@
     <div class="col-md-10">
         {% for achievement in achievements_FR %}
             <div class="row">
-                <div class="col-md-2">{{ achievement.code_name }}</div>
-                <div class="col-md-5">{{ achievement.text|safe }}</div>
-                <div class="col-md-5">
-                    {% if achievements_EN.forloop.counter0 %}
-                        {{ achievements_EN.forloop.counter0.text|safe }}
-                    {% endif %}
+                <div class="col-md-1">
+                    <a class="show collapseIndicator" role="button" data-toggle="collapse" aria-expanded="false"
+                       data-target="#collapsable_{{ forloop.counter0 }}" aria-controls="collapse_expend">
+                        <i class="fa fa-arrow-up"></i>
+                    </a>
+                    {{ achievement.code_name }}
+                </div>
+                <div id="collapsable_{{ forloop.counter0 }}" class="collapse in">
+                    <div class="col-md-5">{{ achievement.text|safe }}</div>
+                    <div class="col-md-6">
+                        {% if achievements_EN.forloop.counter0 %}
+                            {{ achievements_EN.forloop.counter0.text|safe }}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% endfor %}
     </div>
 </div>
+
+{% block script %}
+<script>
+$(document).ready(function(){
+    $(".collapseIndicator").click(function(e){
+        if ($(e.target).hasClass('fa-arrow-up')) {
+            $(e.target).removeClass('fa-arrow-up');
+            $(e.target).addClass('fa-arrow-down');
+        } else {
+            $(e.target).removeClass('fa-arrow-down');
+            $(e.target).addClass('fa-arrow-up');
+        }
+    });
+});
+</script>
+{% endblock %}

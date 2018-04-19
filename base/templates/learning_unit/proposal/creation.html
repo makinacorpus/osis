@@ -9,6 +9,7 @@
             <label>{% trans 'proposal_management' %}</label>
         </div>
         <div class="panel-body">
+            {% bootstrap_form_errors form_proposal %}
             {% include 'learning_unit/blocks/proposal_folder.html' with form=form_proposal %}
         </div>
     </div>

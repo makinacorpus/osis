@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import itertools
 import re
 
 from django.conf import settings
@@ -53,12 +54,12 @@ from base.forms.learning_unit_pedagogy import LearningUnitPedagogyEditForm
 from base.forms.learning_unit_specifications import LearningUnitSpecificationsForm, LearningUnitSpecificationsEditForm
 from base.models.academic_year import AcademicYear
 from base.models.learning_unit import REGEX_BY_SUBTYPE
-from base.models import proposal_learning_unit, group_element_year
+from base.models import proposal_learning_unit
 from base.models.learning_unit_year import LearningUnitYear
 from base.models.person import Person
 from base.views.learning_units import perms
 from base.views.learning_units.common import show_success_learning_unit_year_creation_message
-from base.views.learning_units.search import _learning_units_search, learning_units
+from base.views.learning_units.search import learning_units_search, learning_units
 from cms.models import text_label
 from osis_common.decorators.ajax import ajax_required
 from . import layout
@@ -86,9 +87,19 @@ def get_common_context_learning_unit_year(learning_unit_year_id, person):
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
 def learning_unit_formations(request, learning_unit_year_id):
-    context = get_common_context_learning_unit_year(learning_unit_year_id,
-                                                    get_object_or_404(Person, user=request.user))
-    context['group_element_years'] = group_element_year.search(child_leaf=context["learning_unit_year"])
+    context = get_common_context_learning_unit_year(learning_unit_year_id, get_object_or_404(Person, user=request.user))
+    group_elements_years = mdl.group_element_year\
+        .search(child_leaf=context["learning_unit_year"])\
+        .select_related("parent", "child_leaf")
+    education_groups_years = [group_element_year.parent for group_element_year in group_elements_years]
+    roots = mdl.group_element_year.find_learning_unit_formation_roots(education_groups_years)
+    flat_root_ids = list(set(itertools.chain.from_iterable(roots.values())))
+    map_instance_by_id = {obj.id: obj
+                          for obj in mdl.education_group_year.EducationGroupYear.objects.filter(id__in=flat_root_ids)}
+    for group_element_year in group_elements_years:
+        group_element_year.trainings = [map_instance_by_id[parent_id]
+                                        for parent_id in roots[group_element_year.parent_id]]
+    context['group_elements_years'] = group_elements_years
     return layout.render(request, "learning_unit/formations.html", context)
 
 
@@ -315,13 +326,13 @@ def check_acronym(request, subtype):
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
 def learning_units_activity(request):
-    return _learning_units_search(request, SIMPLE_SEARCH)
+    return learning_units_search(request, SIMPLE_SEARCH)
 
 
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
 def learning_units_service_course(request):
-    return _learning_units_search(request, SERVICE_COURSES_SEARCH)
+    return learning_units_search(request, SERVICE_COURSES_SEARCH)
 
 
 @login_required

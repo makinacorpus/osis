@@ -320,7 +320,7 @@ def _update_learning_unit_year(luy_to_update, fields_to_update, with_report):
     if with_report:
         fields_to_exclude = FIELDS_TO_EXCLUDE_WITH_REPORT
 
-    update_instance_model_from_data(luy_to_update.learning_unit, fields_to_update)
+    update_instance_model_from_data(luy_to_update.learning_unit, fields_to_update, exclude=('acronym',))
     update_instance_model_from_data(luy_to_update.learning_container_year, fields_to_update, exclude=fields_to_exclude)
     update_instance_model_from_data(luy_to_update, fields_to_update, exclude=fields_to_exclude)
 

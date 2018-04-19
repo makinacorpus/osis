@@ -46,7 +46,7 @@ PROPOSAL_SEARCH = 3
 SUMMARY_LIST = 4
 
 
-def _learning_units_search(request, search_type):
+def learning_units_search(request, search_type):
     service_course_search = search_type == SERVICE_COURSES_SEARCH
 
     form = LearningUnitYearForm(request.GET or None, service_course_search=service_course_search)
@@ -79,13 +79,13 @@ def _learning_units_search(request, search_type):
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
 def learning_units(request):
-    return _learning_units_search(request, SIMPLE_SEARCH)
+    return learning_units_search(request, SIMPLE_SEARCH)
 
 
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
 def learning_units_service_course(request):
-    return _learning_units_search(request, SERVICE_COURSES_SEARCH)
+    return learning_units_search(request, SERVICE_COURSES_SEARCH)
 
 
 @login_required

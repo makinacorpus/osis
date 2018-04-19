@@ -28,7 +28,7 @@ from unittest import mock
 from unittest.mock import patch
 
 from django.contrib.messages import SUCCESS, ERROR
-from django.test import TestCase, SimpleTestCase
+from django.test import TestCase
 from django.utils.translation import ugettext_lazy as _
 
 from base import models as mdl_base
@@ -40,6 +40,7 @@ from base.models.academic_year import AcademicYear, LEARNING_UNIT_CREATION_SPAN_
 from base.models.enums import organization_type, proposal_type, entity_type, \
     learning_container_year_types, entity_container_year_link_type, \
     learning_unit_year_subtypes, proposal_state
+from base.models.enums.proposal_type import ProposalType
 from base.models.proposal_learning_unit import ProposalLearningUnit
 from base.tests.factories.academic_year import create_current_academic_year, AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
@@ -51,19 +52,6 @@ from base.tests.factories.learning_unit_year import LearningUnitYearFakerFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.proposal_learning_unit import ProposalLearningUnitFactory
-
-
-class TestLearningUnitProposal(TestCase):
-
-    def test_get_data_dict(self):
-        self.assertIsNone(lu_proposal_business._get_data_dict('key1', None))
-        self.assertIsNone(lu_proposal_business._get_data_dict('key1', {'key2': 'nothing serious'}))
-        self.assertEqual(lu_proposal_business._get_data_dict('key1', {'key1': 'nothing serious'}), 'nothing serious')
-
-    def test_get_data_dict(self):
-        data = {'key1': 'thing', 'key2': ''}
-        self.assertEqual(lu_proposal_business._get_rid_of_blank_value(data),
-                         {'key1': 'thing', 'key2': None})
 
 
 class TestLearningUnitProposalCancel(TestCase):
@@ -163,29 +151,39 @@ class TestLearningUnitProposalCancel(TestCase):
                                            state=prop_state)
 
 
-class TestComputeProposalType(SimpleTestCase):
+class TestComputeProposalType(TestCase):
     def test_return_creation_type_when_creation_is_initial_proposal_type(self):
-        actual_proposal_type = compute_proposal_type([], proposal_type.ProposalType.CREATION.name)
+        proposal = ProposalLearningUnitFactory(type=ProposalType.CREATION.name )
+        actual_proposal_type = compute_proposal_type(proposal)
         self.assertEqual(proposal_type.ProposalType.CREATION.name, actual_proposal_type)
 
     def test_return_suppression_type_when_suppresion_is_initial_proposal_type(self):
-        actual_proposal_type = compute_proposal_type([], proposal_type.ProposalType.SUPPRESSION.name)
+        proposal = ProposalLearningUnitFactory(type=ProposalType.SUPPRESSION.name )
+        actual_proposal_type = compute_proposal_type(proposal)
         self.assertEqual(proposal_type.ProposalType.SUPPRESSION.name, actual_proposal_type)
 
     def test_return_transformation_when_data_changed_consist_of_first_letter(self):
-        actual_proposal_type = compute_proposal_type(["acronym"], None)
+        proposal = ProposalLearningUnitFactory(type=ProposalType.MODIFICATION.name, initial_data={
+            'learning_unit_year':{'acronym': 'bibi'}} )
+
+        actual_proposal_type = compute_proposal_type(proposal)
         self.assertEqual(proposal_type.ProposalType.TRANSFORMATION.name, actual_proposal_type)
 
     def test_return_modification_when_data_changed_consist_of_other_fields_than_first_letter_or_acronym(self):
-        actual_proposal_type = compute_proposal_type(["common_title"], None)
+        proposal = ProposalLearningUnitFactory(type=ProposalType.MODIFICATION.name, initial_data={
+            'learning_container_year':{'common_title': 'bibi'}} )
+        actual_proposal_type = compute_proposal_type(proposal)
         self.assertEqual(proposal_type.ProposalType.MODIFICATION.name, actual_proposal_type)
 
     def test_return_modification_when_no_data_changed(self):
-        actual_proposal_type = compute_proposal_type([], None)
+        proposal = ProposalLearningUnitFactory(type=ProposalType.MODIFICATION.name, initial_data={} )
+        actual_proposal_type = compute_proposal_type(proposal)
         self.assertEqual(proposal_type.ProposalType.MODIFICATION.name, actual_proposal_type)
 
     def test_return_transformation_and_modification_when_modifying_acronym_and_other_field(self):
-        actual_proposal_type = compute_proposal_type(["acronym", "common_title"], None)
+        proposal = ProposalLearningUnitFactory(type=ProposalType.MODIFICATION.name, initial_data={
+            'learning_unit_year': {'acronym': 'bobo'}, 'learning_container_year':{'common_title': 'bibi'}} )
+        actual_proposal_type = compute_proposal_type(proposal)
         self.assertEqual(proposal_type.ProposalType.TRANSFORMATION_AND_MODIFICATION.name, actual_proposal_type)
 
 
@@ -232,7 +230,7 @@ class TestConsolidateProposals(TestCase):
 
 class TestConsolidateProposal(TestCase):
     def test_when_proposal_is_not_accepted_nor_refused(self):
-        states = (state for state, _ in proposal_state.ProposalState.__members__.items()
+        states = (state for state, value in proposal_state.ProposalState.__members__.items()
                   if state not in PROPOSAL_CONSOLIDATION_ELIGIBLE_STATES )
         for state in states:
             with self.subTest(state=state):

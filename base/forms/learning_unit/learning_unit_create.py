@@ -47,11 +47,6 @@ from base.models.learning_unit import LearningUnit
 from base.models.learning_unit_component import LearningUnitComponent
 from base.models.learning_unit_year import LearningUnitYear
 
-PARTIM_FORM_READ_ONLY_FIELD = {'common_title', 'common_title_english', 'requirement_entity',
-                               'allocation_entity', 'language', 'periodicity', 'campus', 'academic_year',
-                               'container_type', 'internship_subtype',
-                               'additional_requirement_entity_1', 'additional_requirement_entity_2'}
-
 DEFAULT_ACRONYM_COMPONENT = {
     LECTURING: "CM1",
     PRACTICAL_EXERCISES: "TP1",
