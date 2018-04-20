@@ -33,7 +33,7 @@ from base import models as mdl_base
 from base.business.entity import get_entity_calendar
 from base.business.learning_unit_year_with_context import volume_learning_component_year
 from base.models import entity_container_year
-from base.models import learning_achievements
+from base.models import learning_achievement
 from base.models.academic_year import find_academic_year_by_year
 from base.models.entity_component_year import EntityComponentYear
 from base.models.enums import entity_container_year_link_type, academic_calendar_type
@@ -298,7 +298,7 @@ def _get_learning_unit_by_luy_entity(cms_list, learning_unit_yr):
 
 def get_achievements_group_by_language(learning_unit_year):
     achievement_grouped = {}
-    all_achievements = learning_achievements.find_by_learning_unit_year(learning_unit_year)
+    all_achievements = learning_achievement.find_by_learning_unit_year(learning_unit_year)
     for achievement in all_achievements:
         key = 'achievements_{}'.format(achievement.language.code)
         achievement_grouped.setdefault(key, []).append(achievement)

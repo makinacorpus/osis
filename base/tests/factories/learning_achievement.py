@@ -30,9 +30,9 @@ from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-class LearningAchievementsFactory(factory.django.DjangoModelFactory):
+class LearningAchievementFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = "base.LearningAchievements"
+        model = "base.LearningAchievement"
 
     code_name = factory.Sequence(lambda n: 'AA %02d' % n)
     text = factory.fuzzy.FuzzyText('label_', 20)

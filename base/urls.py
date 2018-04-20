@@ -38,6 +38,7 @@ from base.views import learning_unit, offer, common, institution, organization, 
     my_osis, entity, student, education_group
 from base.views.learning_units.proposal import create, update
 from base.views.learning_units.update import update_learning_unit, learning_unit_edition_end_date
+from base.views import learning_achievement
 
 urlpatterns = [
     url(r'^$', common.home, name='home'),
@@ -131,6 +132,9 @@ urlpatterns = [
                 name="learning_unit_delete_all"),
             url(r'^partim/', include([
                 url(r'^new/$', learning_unit.create_partim_form, name="learning_unit_create_partim"),
+            ])),
+            url(r'^achievements/', include([
+                url(r'^management/', learning_achievement.management, name="achievement_management"),
             ])),
         ])),
         url(r'^check/(?P<subtype>[A-Z]+)$', learning_unit.check_acronym, name="check_acronym"),

@@ -66,7 +66,7 @@ from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_container_year import EntityContainerYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.learning_achievements import LearningAchievementsFactory
+from base.tests.factories.learning_achievement import LearningAchievementFactory
 from base.tests.factories.learning_class_year import LearningClassYearFactory
 from base.tests.factories.learning_component_year import LearningComponentYearFactory
 from base.tests.factories.learning_container import LearningContainerFactory
@@ -645,6 +645,8 @@ class LearningUnitViewTestCase(TestCase):
         self.assertEqual(template, 'learning_unit/formations.html')
         self.assertEqual(context['current_academic_year'], self.current_academic_year)
         self.assertEqual(context['learning_unit_year'], learning_unit_year)
+        self.assertIn('group_elements_years', context)
+        self.assertIn('root_formations', context)
 
     def test_learning_unit_usage_two_usages(self):
         learning_container_yr = LearningContainerYearFactory(academic_year=self.current_academic_year,
@@ -1203,8 +1205,8 @@ class LearningUnitViewTestCase(TestCase):
         learning_unit_year = LearningUnitYearFactory()
         fr = LanguageFactory(code='FR')
         en = LanguageFactory(code='EN')
-        learning_unit_achievements_fr = LearningAchievementsFactory(language=fr,learning_unit_year=learning_unit_year)
-        learning_unit_achievements_en = LearningAchievementsFactory(language=en,learning_unit_year=learning_unit_year)
+        learning_unit_achievements_fr = LearningAchievementFactory(language=fr,learning_unit_year=learning_unit_year)
+        learning_unit_achievements_en = LearningAchievementFactory(language=en,learning_unit_year=learning_unit_year)
 
         request = self.create_learning_unit_request(learning_unit_year)
 
@@ -1396,7 +1398,7 @@ class TestLearningAchievements(TestCase):
         self.code_languages = ["FR", "EN", "IT"]
         for code_language in self.code_languages:
             language = LanguageFactory(code=code_language)
-            LearningAchievementsFactory(language=language, learning_unit_year=self.learning_unit_year)
+            LearningAchievementFactory(language=language, learning_unit_year=self.learning_unit_year)
 
     def test_get_achievements_group_by_language_no_achievement(self):
         a_luy_without_achievements = LearningUnitYearFactory(

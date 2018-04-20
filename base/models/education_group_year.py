@@ -36,6 +36,7 @@ from base.models.enums import offer_year_entity_type
 from base.models.enums import education_group_categories
 from base.models.exceptions import MaximumOneParentAllowedException
 from base.models.osis_model_admin import OsisModelAdmin
+from django.db.models import Count, Q
 
 
 class EducationGroupYearAdmin(OsisModelAdmin):
@@ -161,6 +162,7 @@ class EducationGroupYear(models.Model):
             return self.education_group_type.category == education_group_categories.TRAINING
         return False
 
+
 def find_by_id(an_id):
     try:
         return EducationGroupYear.objects.get(pk=an_id)
@@ -194,3 +196,23 @@ def search(**kwargs):
         qs = qs.filter(partial_acronym__icontains=kwargs['partial_acronym'])
 
     return qs.select_related('education_group_type', 'academic_year')
+
+
+# TODO :: Annotate/Count() in only 1 query instead of 2
+def find_with_enrollments_count(learning_unit_year, education_groups_years):
+    education_group_year_ids = [educ_group.id for educ_group in education_groups_years]
+    educ_groups = search(id=education_group_year_ids).annotate(count_formation_enrollments=Count('offerenrollment'))\
+                                                     .order_by('acronym')
+    learning_unit_enrol_count_by_id = _find_with_learning_unit_enrollment_count(learning_unit_year,
+                                                                                education_group_year_ids)
+    for educ_group in educ_groups:
+        educ_group.count_learning_unit_enrollments = learning_unit_enrol_count_by_id.get(educ_group.id, 0)
+    return educ_groups
+
+
+def _find_with_learning_unit_enrollment_count(learning_unit_year, education_group_year_ids):
+    objects = search(id=education_group_year_ids)\
+        .filter(offerenrollment__learningunitenrollment__learning_unit_year_id=learning_unit_year)\
+        .annotate(count_learning_unit_enrollments=Count('offerenrollment__learningunitenrollment'))\
+        .values('id', 'count_learning_unit_enrollments')
+    return {obj['id']: obj['count_learning_unit_enrollments'] for obj in objects}

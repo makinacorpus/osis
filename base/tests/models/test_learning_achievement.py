@@ -26,17 +26,18 @@
 from django.test import TestCase
 from django.db import IntegrityError
 
-from base.models import learning_achievements
+from base.models import learning_achievement
 from base.tests.factories.academic_year import create_current_academic_year
 from reference.tests.factories.language import LanguageFactory
 from base.tests.factories.business.learning_units import GenerateContainer
-from base.tests.factories.learning_achievements import LearningAchievementsFactory
+from base.tests.factories.learning_achievement import LearningAchievementFactory
 
 
 A_CODE_NAME = 'AA 1'
 A2_CODE_NAME = 'AA 2'
 
-class LearningAchievementsTest(TestCase):
+
+class LearningAchievementTest(TestCase):
 
     def setUp(self):
         current_academic_year = create_current_academic_year()
@@ -48,27 +49,38 @@ class LearningAchievementsTest(TestCase):
         self.language_en = LanguageFactory(code='EN')
 
     def test_unique(self):
-        LearningAchievementsFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy, language=self.language_fr)
+        LearningAchievementFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy, language=self.language_fr)
         with self.assertRaises(IntegrityError):
-            LearningAchievementsFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy, language=self.language_fr)
+            LearningAchievementFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy, language=self.language_fr)
 
     def test_find_by_learning_unit_year(self):
-        luy_achievement_fr = LearningAchievementsFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
+        luy_achievement_fr = LearningAchievementFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
                                                          language=self.language_fr)
-        luy_achievement_en = LearningAchievementsFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
+        luy_achievement_en = LearningAchievementFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
                                                          language=self.language_en)
-        result = learning_achievements.find_by_learning_unit_year(self.luy)
+        result = learning_achievement.find_by_learning_unit_year(self.luy)
         self.assertIn(luy_achievement_fr, result)
         self.assertIn(luy_achievement_en, result)
 
     def test_find_by_learning_unit_year_order(self):
-        luy_achievement_fr_1 = LearningAchievementsFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
+        luy_achievement_fr_1 = LearningAchievementFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
                                                            language=self.language_fr)
-        luy_achievement_en_1 = LearningAchievementsFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
+        luy_achievement_en_1 = LearningAchievementFactory(code_name=A_CODE_NAME, learning_unit_year=self.luy,
                                                            language=self.language_en)
-        luy_achievement_fr_2 = LearningAchievementsFactory(code_name=A2_CODE_NAME, learning_unit_year=self.luy,
+        luy_achievement_fr_2 = LearningAchievementFactory(code_name=A2_CODE_NAME, learning_unit_year=self.luy,
                                                            language=self.language_fr)
         # By default, OrderModel insert with the highest model + 1
         expected_result = [luy_achievement_en_1, luy_achievement_fr_1, luy_achievement_fr_2]
-        result = list(learning_achievements.find_by_learning_unit_year(self.luy))
+        result = list(learning_achievement.find_by_learning_unit_year(self.luy))
         self.assertListEqual(result, expected_result)
+
+    def test_find_learning_unit_achievement(self):
+        luy_achievement_fr_1 = LearningAchievementFactory(code_name=A_CODE_NAME,
+                                                           learning_unit_year=self.luy,
+                                                           language=self.language_fr)
+        self.assertEqual(learning_achievement.find_learning_unit_achievement(luy_achievement_fr_1.learning_unit_year,
+                                                                              luy_achievement_fr_1.language.code,
+                                                                              0), luy_achievement_fr_1)
+        self.assertIsNone(learning_achievement.find_learning_unit_achievement(luy_achievement_fr_1.learning_unit_year,
+                                                                               luy_achievement_fr_1.language.code,
+                                                                               100))

@@ -29,9 +29,10 @@ from django.utils.translation import ugettext_lazy as _
 from ckeditor.fields import RichTextField
 from ordered_model.models import OrderedModel
 from ordered_model.admin import OrderedModelAdmin
+from django.core.exceptions import ObjectDoesNotExist
 
 
-class LearningAchievementsAdmin(OrderedModelAdmin):
+class LearningAchievementAdmin(OrderedModelAdmin):
     list_display = ('learning_unit_year', 'code_name', 'order', 'move_up_down_links', 'language')
     fieldsets = ((None, {'fields': ('learning_unit_year', 'code_name', 'order', 'text', 'language')}),)
     readonly_fields = ['order']
@@ -39,7 +40,7 @@ class LearningAchievementsAdmin(OrderedModelAdmin):
     raw_id_fields = ('learning_unit_year', 'language')
 
 
-class LearningAchievements(OrderedModel):
+class LearningAchievement(OrderedModel):
     external_id = models.CharField(max_length=100, blank=True, null=True)
     changed = models.DateTimeField(null=True, auto_now=True)
     code_name = models.CharField(max_length=100, verbose_name=_('code'))
@@ -56,6 +57,15 @@ class LearningAchievements(OrderedModel):
 
 
 def find_by_learning_unit_year(learning_unit_yr):
-    return LearningAchievements.objects.filter(learning_unit_year=learning_unit_yr)\
-                                       .select_related('language')\
-                                       .order_by('order', 'language__code')
+    return LearningAchievement.objects.filter(learning_unit_year=learning_unit_yr) \
+        .select_related('language') \
+        .order_by('order', 'language__code')
+
+
+def find_learning_unit_achievement(learning_unit_yr, a_language_code, position):
+    try:
+        return LearningAchievement.objects.get(learning_unit_year=learning_unit_yr,
+                                               language__code=a_language_code,
+                                               order=position)
+    except ObjectDoesNotExist:
+        return None

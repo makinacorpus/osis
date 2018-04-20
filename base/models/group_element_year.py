@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import itertools
 from base.models.education_group_type import GROUP_TYPE_OPTION
 from base.models.education_group_year import EducationGroupYear
 from base.models.learning_unit_year import LearningUnitYear
@@ -30,7 +31,7 @@ from django.db import models
 from django.contrib import admin
 from base.models.enums import sessions_derogation
 from base.models.enums import education_group_categories
-from base.models import education_group_type
+from base.models import education_group_type, education_group_year
 from django.db.models import Q
 
 
@@ -86,11 +87,14 @@ def find_by_parent(an_education_group_year):
     return GroupElementYear.objects.filter(parent=an_education_group_year)
 
 
-def find_learning_unit_formation_roots(objects):
+def find_learning_unit_formation_roots(objects, parents_as_instances=False):
+    root_ids_by_object_id = {}
     if objects:
         filters = _get_root_filters()
-        return _find_related_root_education_groups(objects, filters=filters)
-    return {}
+        root_ids_by_object_id = _find_related_root_education_groups(objects, filters=filters)
+        if parents_as_instances:
+            root_ids_by_object_id = _convert_parent_ids_to_instances(root_ids_by_object_id)
+    return root_ids_by_object_id
 
 
 def _get_root_filters():
@@ -100,6 +104,15 @@ def _get_root_filters():
     return {
         'parent__education_group_type__name': root_type_names,
         'parent__education_group_type__category': root_categories
+    }
+
+
+def _convert_parent_ids_to_instances(root_ids_by_object_id):
+    flat_root_ids = list(set(itertools.chain.from_iterable(root_ids_by_object_id.values())))
+    map_instance_by_id = {obj.id: obj for obj in education_group_year.search(id=flat_root_ids)}
+    return {
+        obj_id: [map_instance_by_id[parent_id] for parent_id in parents]
+        for obj_id, parents in root_ids_by_object_id.items()
     }
 
 

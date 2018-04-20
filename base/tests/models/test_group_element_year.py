@@ -24,6 +24,7 @@
 #
 ##############################################################################
 from unittest import mock
+from base.models.education_group_year import EducationGroupYear
 from base.models.enums import education_group_categories
 from base.models.learning_unit_year import LearningUnitYear
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
@@ -291,6 +292,31 @@ class TestFindLearningUnitFormationRoots(TestCase):
     def test_case_arg_is_none(self):
         result = group_element_year.find_learning_unit_formation_roots(None)
         self.assertEqual(result, {})
+
+    def test_with_kwarg_parents_as_instances_is_true(self):
+        group_element = GroupElementYearFactory(
+            child_branch=None,
+            child_leaf=self.child_leaf
+        )
+        result = group_element_year.find_learning_unit_formation_roots([self.child_leaf], parents_as_instances=True)
+        self.assertEqual(result[self.child_leaf.id], [group_element.parent])
+
+
+class TestConvertParentIdsToInstances(TestCase):
+    """Unit tests for _convert_parent_ids_to_instances()"""
+    def test_ids_correctly_converted_to_instances(self):
+        group_element = GroupElementYearFactory(
+            child_branch=None,
+            child_leaf=LearningUnitYearFactory()
+        )
+        root_ids_by_object_id = group_element_year.find_learning_unit_formation_roots([group_element.child_leaf])
+        result = group_element_year._convert_parent_ids_to_instances(root_ids_by_object_id)
+        expected_result = {
+            group_element.child_leaf.id: [group_element.parent]
+        }
+        self.assertDictEqual(result, expected_result)
+        self.assertIsInstance(list(result.keys())[0], int)
+        self.assertIsInstance(result[group_element.child_leaf.id][0], EducationGroupYear)
 
 
 class TestBuildChildKey(TestCase):

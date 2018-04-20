@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from base.tests.factories.learning_unit_enrollment import LearningUnitEnrollmentFactory
+from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from base.tests.factories.offer_enrollment import OfferEnrollmentFactory
 from django.test import TestCase
-from base.models.education_group_year import offer_year_entity_type, find_by_id, search
+from base.models.education_group_year import offer_year_entity_type, find_by_id, search, find_with_enrollments_count
 from base.models.exceptions import MaximumOneParentAllowedException
 from base.models.enums import education_group_categories
-from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.academic_year import AcademicYearFactory, create_current_academic_year
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.offer_year import OfferYearFactory
@@ -135,4 +138,56 @@ class EducationGroupYearTest(TestCase):
         self.assertListEqual(children_by_group_element_year, [])
 
 
+class TestFindWithEnrollmentsCount(TestCase):
+    """Unit tests on find_with_enrollments_count()"""
+    def setUp(self):
+        self.current_academic_year = create_current_academic_year()
+        self.learning_unit_year = LearningUnitYearFactory(academic_year=self.current_academic_year)
+        self.education_group_year = EducationGroupYearFactory(academic_year=self.current_academic_year)
+        GroupElementYearFactory(parent=self.education_group_year,
+                                child_branch=None,
+                                child_leaf=self.learning_unit_year)
 
+    def test_case_education_groups_years_arg_is_none(self):
+        result = list(find_with_enrollments_count(self.learning_unit_year, []))
+        self.assertIsInstance(result, list)
+        self.assertFalse(result)
+
+    def test_all_education_groups_years_correctly_returned(self):
+        education_group_list = [self.education_group_year]
+        result = find_with_enrollments_count(self.learning_unit_year, education_group_list)
+        self.assertListEqual(list(result), education_group_list)
+
+    def test_count_offer_enrollments(self):
+        OfferEnrollmentFactory(education_group_year=self.education_group_year)
+        result = find_with_enrollments_count(self.learning_unit_year, [self.education_group_year])
+        self.assertEqual(result[0].count_formation_enrollments, 1)
+
+    def test_count_learning_unit_enrollments(self):
+        LearningUnitEnrollmentFactory(
+            offer_enrollment=OfferEnrollmentFactory(education_group_year=self.education_group_year),
+            learning_unit_year=self.learning_unit_year
+        )
+        result = find_with_enrollments_count(self.learning_unit_year, [self.education_group_year])
+        self.assertEqual(result[0].count_learning_unit_enrollments, 1)
+
+    def test_ordered_by_acronym(self):
+        group_1 = GroupElementYearFactory(parent=EducationGroupYearFactory(acronym='XDRT1234'),
+                                          child_branch=None,
+                                          child_leaf=self.learning_unit_year)
+        group_2 = GroupElementYearFactory(parent=EducationGroupYearFactory(acronym='BMED1000'),
+                                          child_branch=None,
+                                          child_leaf=self.learning_unit_year)
+        group_3 = GroupElementYearFactory(parent=EducationGroupYearFactory(acronym='LDROI1001'),
+                                          child_branch=None,
+                                          child_leaf=self.learning_unit_year)
+        education_groups = [group_1.parent, group_2.parent, group_3.parent]
+        result = find_with_enrollments_count(self.learning_unit_year, education_groups)
+        expected_list_order = [group_2.parent, group_3.parent, group_1.parent]
+        self.assertEqual(list(result), expected_list_order)
+
+    def test_case_learning_unit_not_in_education_groups(self):
+        enrol_not_in_education_group = LearningUnitEnrollmentFactory(learning_unit_year=LearningUnitYearFactory())
+        result = find_with_enrollments_count(enrol_not_in_education_group.learning_unit_year,
+                                             [self.education_group_year])
+        self.assertEqual(result[0].count_learning_unit_enrollments, 0)
