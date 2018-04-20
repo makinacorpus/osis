@@ -38,6 +38,7 @@ from base.models.entity_container_year import find_entities_grouped_by_linktype
 from base.models.enums import proposal_state, proposal_type
 from base.models.enums.entity_container_year_link_type import ENTITY_TYPE_LIST
 from base.models.enums.proposal_type import ProposalType
+from base.models.learning_unit_year import get_by_id
 from base.utils import send_mail as send_mail_util
 from reference.models import language
 
@@ -355,3 +356,23 @@ def get_entity_by_type(entity_type, entities_by_type):
         return entities_by_type[entity_type].id
     else:
         return None
+
+
+def update_open_fields_in_proposal_initial_data(learning_unit_year):
+    proposal = mdl_base.proposal_learning_unit.find_by_learning_unit_year(learning_unit_year)
+
+    updating_data = {
+        "learning_unit_year":
+            {
+                "quadrimester": learning_unit_year.quadrimester,
+                "session": learning_unit_year.session
+            },
+        "learning_container_year":
+            {
+                "team": learning_unit_year.learning_container_year.team
+            }
+    }
+    for key, value in updating_data.items():
+        proposal.initial_data[key].update(value)
+
+    proposal.save()

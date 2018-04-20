@@ -30,6 +30,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from base import models as mdl_base
 from base.business import learning_unit_year_with_context
+from base.business import learning_unit_proposal
 from base.business.learning_unit_year_with_context import ENTITY_TYPES_VOLUME
 from base.business.learning_units.simple.deletion import delete_from_given_learning_unit_year, \
     check_learning_unit_year_deletion
@@ -325,6 +326,9 @@ def _update_learning_unit_year(luy_to_update, fields_to_update, with_report):
     update_instance_model_from_data(luy_to_update.learning_container_year, fields_to_update, exclude=fields_to_exclude)
     update_instance_model_from_data(luy_to_update, fields_to_update,
                                     exclude=fields_to_exclude + ("in_charge",))
+
+    if luy_to_update.is_in_proposal():
+        learning_unit_proposal.update_open_fields_in_proposal_initial_data(luy_to_update)
 
 
 def _update_learning_unit_year_entities(luy, entities_by_type_to_update):
