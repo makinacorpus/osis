@@ -31,6 +31,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from base.business.learning_unit import SERVICE_COURSES_SEARCH, create_xls, SIMPLE_SEARCH
+from base.decorators import cache_filter
 from base.forms.common import TooManyResultsException
 from base.forms.learning_unit.search_form import LearningUnitYearForm
 from base.forms.proposal.learning_unit_proposal import LearningUnitProposalForm, ProposalStateModelForm
@@ -82,12 +83,14 @@ def learning_units_search(request, search_type):
 
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
+@cache_filter()
 def learning_units(request):
     return learning_units_search(request, SIMPLE_SEARCH)
 
 
 @login_required
 @permission_required('base.can_access_learningunit', raise_exception=True)
+@cache_filter()
 def learning_units_service_course(request):
     return learning_units_search(request, SERVICE_COURSES_SEARCH)
 
