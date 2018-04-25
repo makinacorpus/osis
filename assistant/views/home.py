@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,10 +42,9 @@ def assistant_home(request):
             manager.find_by_person(person=request.user.person)
             return HttpResponseRedirect(reverse('manager_home'))
         except manager.Manager.DoesNotExist:
-            try:
-                reviewer.find_by_person(person=request.user.person)
+            if reviewer.find_by_person(person=request.user.person):
                 return HttpResponseRedirect(reverse('reviewer_mandates_list_todo'))
-            except reviewer.Reviewer.DoesNotExist:
+            else:
                 return HttpResponseRedirect(reverse('access_denied'))
 
 
@@ -53,6 +52,7 @@ def assistant_home(request):
 def manager_home(request):
     return render(request, 'manager_home.html')
 
-
 def access_denied(request):
-    return render(request, "access_denied.html")
+    response = render(request, 'access_denied.html', {})
+    response.status_code = 403
+    return response

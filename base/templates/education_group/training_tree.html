@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,80 +24,27 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <div id="panel-collapse" class="col-md-3">
-    <div id="collapse" class="panel panel-default" style="display:block;">
+    <a class="button" onclick="showDiv()">
+        <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+    </a>
+    <div id="collapse" class="panel panel-default" style="display:block;overflow: auto;">
         <div class="panel-body">
-            <ul id="browser" class="filetree treeview-default">
-                <li>
-                    <span class="folder">
-                        {% if parent.id %}
-                        <a href="{% url 'education_group_read' education_group_year_id=parent.id %}?root={{ parent.id}}&tree=1">
-                            {{ parent.acronym }}
-                        </a>
-                        {% endif %}
-                    </span>
-                    {% for elem in parent.children_by_group_element_year %}
-                        <ul>
-                            <li>
-                                <span {% if elem.children_by_group_element_year %} class="folder" {% else %} class="file" {% endif %}>
-                                    <a href="{% url 'education_group_read' education_group_year_id=elem.id %}?root={{ parent.id}}&tree=1">
-                                        {{ elem.acronym }}
-                                    </a>
-                                </span>
-                                {% include "education_group/branch.html" %}
-                            </li>
-                        </ul>
-                    {% endfor %}
-                </li>
-            </ul>
+
+{#            Button to expand and close all nodes of the trees#}
+            <div class="row">
+                <a class="button pull-right col-md-1" id="tree_close_all">
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                </a>
+
+                <a class="button pull-right col-md-1" id="tree_open_all">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>
+            </div>
+
+{#            Tree figure#}
+            <div class="row" id="panel_file_tree">
+                {% include "education_group/branch.html" with parent=parent children=parent.children_by_group_element_year root=parent current_education_group_year=education_group_year viewname=request.resolver_match.url_name only%}
+            </div>
         </div>
     </div>
 </div>
-{% block script %}
-<script>
-    function showDiv(){
-        if(document.getElementById('collapse').style.display == "block"){
-            document.getElementById('collapse').style.display = "none";
-            document.getElementById('panel-collapse').className = "col-md-0";
-            document.getElementById('panel-data').className = "col-md-12";
-            document.getElementById('link_identification').href = "{% url 'education_group_read' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_diploma').href = "{% url 'education_group_diplomas' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_general_information').href = "{% url 'education_group_general_informations' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_administrative').href = "{% url 'education_group_administrative' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_content').href = "{% url 'education_group_content' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";        }
-        else{
-            document.getElementById('collapse').style.display = "block";
-            document.getElementById('panel-collapse').className = "col-md-3";
-            document.getElementById('panel-data').className = "col-md-9";
-            document.getElementById('link_identification').href = "{% url 'education_group_read' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=1";
-            document.getElementById('link_diploma').href = "{% url 'education_group_diplomas' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=1";
-            document.getElementById('link_general_information').href = "{% url 'education_group_general_informations' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=1";
-            document.getElementById('link_administrative').href = "{% url 'education_group_administrative' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=1";
-            document.getElementById('link_content').href = "{% url 'education_group_content' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=1";
-        }
-    }
-
-    function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
-
-    window.onload = function() {
-        if (getParameterByName('tree') === "0") {
-            document.getElementById('collapse').style.display = "none";
-            document.getElementById('panel-collapse').className = "col-md-0";
-            document.getElementById('panel-data').className = "col-md-12";
-            document.getElementById('link_identification').href = "{% url 'education_group_read' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_diploma').href = "{% url 'education_group_diplomas' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_general_information').href = "{% url 'education_group_general_informations' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_administrative').href = "{% url 'education_group_administrative' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-            document.getElementById('link_content').href = "{% url 'education_group_content' education_group_year_id=education_group_year.id %}?root={{ parent.id}}&tree=0";
-        }
-    }
-
-</script>
-{% endblock %}

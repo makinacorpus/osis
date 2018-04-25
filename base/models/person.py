@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,15 +24,24 @@
 #
 ##############################################################################
 from datetime import date
+
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
-from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
-from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
-from base.models.enums import person_source_type
 from django.db.models import Value
 from django.db.models.functions import Concat, Lower
+from django.utils.functional import cached_property
+from django.utils.translation import ugettext_lazy as _
+
+from base.business.learning_units.perms import is_person_linked_to_entity_in_charge_of_learning_unit
+from base.models.entity_version import find_main_entities_version
+from base.models.enums import person_source_type
+from base.models.utils.person_entity_filter import filter_by_attached_entities
+from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
+
+CENTRAL_MANAGER_GROUP = "central_managers"
+FACULTY_MANAGER_GROUP = "faculty_managers"
 
 
 class PersonAdmin(SerializableModelAdmin):
@@ -93,6 +102,12 @@ class Person(SerializableModel):
         else:
             return "-"
 
+    def is_central_manager(self):
+        return self.user.groups.filter(name=CENTRAL_MANAGER_GROUP).exists()
+
+    def is_faculty_manager(self):
+        return self.user.groups.filter(name=FACULTY_MANAGER_GROUP).exists()
+
     def __str__(self):
         first_name = ""
         middle_name = ""
@@ -113,9 +128,19 @@ class Person(SerializableModel):
             ("can_edit_education_group_administrative_data", "Can edit education group administrative data"),
         )
 
+    def is_linked_to_entity_in_charge_of_learning_unit_year(self, learning_unit_year):
+        return is_person_linked_to_entity_in_charge_of_learning_unit(learning_unit_year, self)
+
+    @cached_property
+    def find_main_entities_version(self):
+        return filter_by_attached_entities(self, find_main_entities_version())
+
 
 def find_by_id(person_id):
-    return Person.objects.get(id=person_id)
+    try:
+        return Person.objects.get(id=person_id)
+    except Person.DoesNotExist:
+        return None
 
 
 def find_by_user(user):
@@ -188,3 +213,7 @@ def calculate_age(person):
     today = date.today()
     return today.year - person.birth_date.year - ((today.month, today.day) < (person.birth_date.month,
                                                                               person.birth_date.day))
+
+
+def find_by_firstname_or_lastname(name):
+    return Person.objects.filter(Q(first_name__icontains=name) | Q(last_name__icontains=name))

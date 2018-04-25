@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,28 +25,27 @@
 ##############################################################################
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.http import require_http_methods
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
-from base.models import academic_year
+from django.views.decorators.http import require_http_methods
+
 from base.models.enums import entity_type
+
+from assistant.business.mandate_entity import get_entities_for_mandate
+from assistant.business.users_access import user_is_phd_supervisor_and_procedure_is_open
 from assistant.forms import ReviewForm
-from assistant.models import assistant_mandate, review, tutoring_learning_unit_year, mandate_entity
-from assistant.models import settings, assistant_document_file
-from assistant.models.enums import review_status, assistant_mandate_state, reviewer_role, document_type
-
-
-def user_is_phd_supervisor_and_procedure_is_open(user):
-    try:
-        if user.is_authenticated() and settings.access_to_procedure_is_open():
-            return assistant_mandate.find_for_supervisor_for_academic_year(user.person,
-                                                                           academic_year.current_academic_year())
-        else:
-            return False
-    except ObjectDoesNotExist:
-        return False
+from assistant.models import assistant_document_file
+from assistant.models import assistant_mandate
+from assistant.models import mandate_entity
+from assistant.models import review
+from assistant.models import tutoring_learning_unit_year
+from assistant.models.enums import assistant_mandate_renewal
+from assistant.models.enums import assistant_mandate_state
+from assistant.models.enums import document_type
+from assistant.models.enums import review_status
+from assistant.models.enums import reviewer_role
 
 
 @require_http_methods(["POST"])
@@ -128,15 +127,7 @@ def review_save(request):
     if form.is_valid():
         current_review = form.save(commit=False)
         if 'validate_and_submit' in request.POST:
-            current_review.status = review_status.DONE
-            current_review.save()
-            if mandate_entity.find_by_mandate_and_type(mandate, entity_type.INSTITUTE):
-                mandate.state = assistant_mandate_state.RESEARCH
-            elif mandate_entity.find_by_mandate_and_type(mandate, entity_type.POLE):
-                mandate.state = assistant_mandate_state.RESEARCH
-            else:
-                mandate.state = assistant_mandate_state.SUPERVISION
-            mandate.save()
+            validate_review_and_update_mandate(current_review, mandate)
             return HttpResponseRedirect(reverse("phd_supervisor_assistants_list"))
         elif 'save' in request.POST:
             current_review.status = review_status.IN_PROGRESS
@@ -157,6 +148,18 @@ def review_save(request):
                                                     'form': form})
 
 
+def validate_review_and_update_mandate(review, mandate):
+    review.status = review_status.DONE
+    review.save()
+    if mandate_entity.find_by_mandate_and_type(mandate, entity_type.INSTITUTE):
+        mandate.state = assistant_mandate_state.RESEARCH
+    elif mandate_entity.find_by_mandate_and_type(mandate, entity_type.POLE):
+        mandate.state = assistant_mandate_state.RESEARCH
+    else:
+        mandate.state = assistant_mandate_state.SUPERVISION
+    mandate.save()
+
+
 @require_http_methods(["POST"])
 @user_passes_test(user_is_phd_supervisor_and_procedure_is_open, login_url='access_denied')
 def pst_form_view(request):
@@ -166,6 +169,7 @@ def pst_form_view(request):
     current_person = request.user.person
     learning_units = tutoring_learning_unit_year.find_by_mandate(mandate)
     assistant = mandate.assistant
+    entities = get_entities_for_mandate(mandate)
     phd_files = assistant_document_file.find_by_assistant_mandate_and_description(mandate,
                                                                                   document_type.PHD_DOCUMENT)
     research_files = assistant_document_file.find_by_assistant_mandate_and_description(mandate,
@@ -173,15 +177,12 @@ def pst_form_view(request):
     tutoring_files = assistant_document_file.find_by_assistant_mandate_and_description(mandate,
                                                                                        document_type.TUTORING_DOCUMENT)
     menu = generate_phd_supervisor_menu_tabs(mandate, None)
-    return render(request, 'pst_form_view.html', {'menu': menu,
-                                                  'mandate_id': mandate.id,
-                                                  'assistant': assistant, 'mandate': mandate,
-                                                  'learning_units': learning_units,
-                                                  'current_person': current_person,
-                                                  'phd_files': phd_files,
-                                                  'research_files': research_files,
-                                                  'tutoring_files': tutoring_files,
-                                                  'role': current_role,
+    return render(request, 'pst_form_view.html', {'menu': menu, 'mandate_id': mandate.id, 'assistant': assistant,
+                                                  'mandate': mandate, 'learning_units': learning_units,
+                                                  'current_person': current_person, 'phd_files': phd_files,
+                                                  'entities': entities, 'research_files': research_files,
+                                                  'tutoring_files': tutoring_files, 'role': current_role,
+                                                  'assistant_mandate_renewal': assistant_mandate_renewal,
                                                   'menu_type': 'phd_supervisor_menu',
                                                   'year': mandate.academic_year.year + 1})
 

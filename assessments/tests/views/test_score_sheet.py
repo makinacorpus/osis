@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ class OfferScoreSheetTabViewTest(TestCase):
         score_sheet.offer_score_encoding_tab(request, self.offer_year.id)
         self.assertTrue(mock_render.called)
         request, template, context = mock_render.call_args[0]
-        self.assertEquals(template, 'offer/score_sheet_address_tab.html')
+        self.assertEqual(template, 'offer/score_sheet_address_tab.html')
         context_keys = self.COMMON_CONTEXT_KEYS + ['entity_id_selected', 'form']
         self.assert_list_contains(list(context.keys()), context_keys)
         self.assertEqual(context['offer_year'], self.offer_year)
@@ -101,6 +101,6 @@ class OfferScoreSheetTabViewTest(TestCase):
         self.assertTrue(mock_render.called)
 
         request, template, context = mock_render.call_args[0]
-        self.assertEquals(template, 'offer/score_sheet_address_tab.html')
+        self.assertEqual(template, 'offer/score_sheet_address_tab.html')
         self.assert_list_contains(list(context.keys()), self.COMMON_CONTEXT_KEYS + ['form'])
 

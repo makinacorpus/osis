@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ from django.http import HttpResponseRedirect
 from django.utils import translation
 from django.utils.translation import ugettext as _
 
+import base.business.learning_unit
 from base import models as mdl
 from attribution import models as mdl_attr
 from base.forms.my_message import MyMessageActionForm, MyMessageForm
@@ -54,13 +55,7 @@ def my_messages_index(request):
     if not my_messages:
         messages.add_message(request, messages.INFO, _('no_messages'))
     else:
-        initial_formset_content = [{'selected': False,
-                                    'subject':  message_hist.subject,
-                                    'created':  message_hist.created,
-                                    'id':       message_hist.id,
-                                    'read':     message_hist.read_by_user
-                                    } for message_hist in my_messages]
-        my_messages_formset = formset_factory(MyMessageForm, extra=0)(initial=initial_formset_content)
+        my_messages_formset = get_messages_formset(my_messages)
     return layout.render(request,
                          "my_osis/my_messages.html",
                          {
@@ -101,18 +96,7 @@ def read_message(request, message_id):
 
 @login_required
 def profile(request):
-    person = mdl.person.find_by_user(request.user)
-    addresses = mdl.person_address.find_by_person(person)
-    tutor = mdl.tutor.find_by_person(person)
-    attributions = mdl_attr.attribution.search(tutor=tutor)
-    programs_managers = mdl.program_manager.find_by_person(person)
-    return layout.render(request, "my_osis/profile.html", {'person':              person,
-                                                           'addresses':           addresses,
-                                                           'tutor':               tutor,
-                                                           'attributions':        attributions,
-                                                           'programs_managers':   programs_managers,
-                                                           'supported_languages': settings.LANGUAGES,
-                                                           'default_language':    settings.LANGUAGE_CODE})
+    return layout.render(request, "my_osis/profile.html", _get_data(request))
 
 
 @login_required
@@ -142,7 +126,8 @@ def messages_templates_index(request):
 @user_passes_test(lambda u: u.is_superuser)
 def send_message_again(request, message_id):
     message_history = message_history_mdl.find_by_id(message_id)
-    if not message_history.person.email:
+
+    if not has_email(message_history):
         messages.add_message(request, messages.ERROR, _('message_not_resent_no_email'))
     else:
         send_mail.send_again(message_id)
@@ -150,5 +135,39 @@ def send_message_again(request, message_id):
     return HttpResponseRedirect(reverse('admin:base_messagehistory_changelist'))
 
 
+@login_required
+def profile_attributions(request):
+    data = _get_data(request)
+    data.update({'tab_attribution_on': True})
+    return layout.render(request, "my_osis/profile.html", data)
 
 
+@login_required
+def _get_data(request):
+    person = mdl.person.find_by_user(request.user)
+    tutor = mdl.tutor.find_by_person(person)
+    return {'person': person,
+            'addresses': mdl.person_address.find_by_person(person),
+            'tutor': tutor,
+            'attributions': mdl_attr.attribution.search(tutor=tutor),
+            'programs_managers': mdl.program_manager.find_by_person(person),
+            'supported_languages': settings.LANGUAGES,
+            'default_language': settings.LANGUAGE_CODE,
+            'summary_submission_opened': base.business.learning_unit.is_summary_submission_opened()}
+
+
+def get_messages_formset(my_messages):
+    initial_formset_content = [{'selected': False,
+                                'subject': message_hist.subject,
+                                'created': message_hist.created,
+                                'id': message_hist.id,
+                                'read': message_hist.read_by_user
+                                } for message_hist in my_messages]
+    return formset_factory(MyMessageForm, extra=0)(initial=initial_formset_content)
+
+
+def has_email(message_history):
+    person = mdl.person.find_by_id(message_history.receiver_id)
+    if person and person.email:
+        return True
+    return False

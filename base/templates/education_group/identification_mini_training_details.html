@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -107,28 +107,46 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label>{% trans 'acronym' %}</label><br>
-                        {% if education_group_year.acronym %}
-                            {{ education_group_year.acronym }}
-                        {% elif parent.acronym %}
-                            <strong class="text-primary">{{ parent.acronym }}</strong>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label>{% trans 'code'%}</label><br>
-                        {% if education_group_year.partial_acronym %}
-                            {{ education_group_year.partial_acronym }}
-                        {% elif parent.partial_acronym %}
-                            <strong class="text-primary">{{ parent.partial_acronym }}</strong>
-                        {% endif %}
-                    </div>
-                </div>
+                <label>{% trans 'acronym' %}</label><br>
+                {% if education_group_year.acronym %}
+                    {{ education_group_year.acronym }}
+                {% elif parent.acronym %}
+                    <strong class="text-primary">{{ parent.acronym }}</strong>
+                {% endif %}
+                <br><br>
+                <label>{% trans 'code'%}</label><br>
+                {% if education_group_year.partial_acronym %}
+                    {{ education_group_year.partial_acronym }}
+                {% elif parent.partial_acronym %}
+                    <strong class="text-primary">{{ parent.partial_acronym }}</strong>
+                {% endif %}
             </div>
         </div>
         <div class="panel panel-default">
             <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>{% trans 'status' %}</label><br>
+                        {%if education_group_year.active %}
+                            {% trans education_group_year.active %}
+                        {% elif parent.active %}
+                            <strong class="text-primary">
+                            {% trans parent.active %}
+                            </strong>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label>{% trans 'schedule_type' %}</label><br>
+                        {% if education_group_year.schedule_type %}
+                            {% trans education_group_year.schedule_type %}
+                        {% elif parent.schedule_type %}
+                            <strong class="text-primary">
+                            {% trans parent.schedule_type %}
+                            </strong>
+                        {% endif %}
+                    </div>
+                </div>
+                <br>
                 <div class="row">
                     <div class="col-md-6">
                         <label>{% trans 'administration_entity' %}</label><br>
@@ -166,16 +184,16 @@
                         {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <label>{% trans 'end' %}</label><br>
+                        <label>{% trans 'end'%}</label><br>
                         {% if education_group_year.education_group.end_year and education_group_year.education_group.end_year %}
                             {{ education_group_year.education_group.end_year }}
                         {% elif parent.education_group.end_year and parent.education_group.end_year %}
                             <strong class="text-primary">
                             {{ parent.education_group.end_year }}
                             </strong>
-                        {% else %}
+                        {% else%}
                             {% trans 'unspecified' %}
-                        {% endif %}
+                        {% endif%}
                     </div>
                 </div>
                 <br>

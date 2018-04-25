@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,19 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.contrib import admin
 from django.db import models
+from django.contrib import admin
 from django.conf import settings
 from .text_label import TextLabel
 
 
 class TranslatedTextLabelAdmin(admin.ModelAdmin):
+    actions = None  # Remove ability to delete in Admin Interface
     list_display = ('label', 'language', 'text_label',)
-    fieldsets = ((None, {'fields': ('label', 'language', 'text_label')}),)
     search_fields = ['label', 'text_label__label']
     ordering = ('label',)
     raw_id_fields = ('text_label',)
     list_filter = ('language',)
+    fieldsets = ((None, {'fields': ('label', 'language', 'text_label',)}),)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class TranslatedTextLabel(models.Model):

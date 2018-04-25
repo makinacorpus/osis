@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from base.tests.factories.offer import OfferFactory
+from django.test import TestCase
+from django.utils import timezone
 from base.models import offer_year
 from base.tests.models import test_offer
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.offer_year import OfferYearFactory
-from django.test import TestCase
-from django.utils import timezone
+from base.tests.factories import academic_year
 
 
 def create_offer_year(acronym, title, academic_year):
@@ -70,3 +72,10 @@ class OfferYearTest(TestCase):
                 for x in range(3)
             ]
         self.assertEqual(offer_year.get_last_offer_year_by_offer(an_offer), offer_years[2])
+
+    def test_find_by_offers_and_year(self):
+        ac_year = academic_year.create_current_academic_year()
+        offer1 = OfferFactory()
+        offer_year1 = OfferYearFactory(offer=offer1, academic_year=ac_year)
+        result = list(offer_year.find_by_offers_and_year([offer1],ac_year))
+        self.assertEqual(result[0],offer_year1)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,10 +26,9 @@
 from django.contrib import admin
 from django.db import models
 
+from assistant.models.enums import reviewer_role
 from base.models import entity_version
 from base.models.enums import entity_type
-from assistant.models import assistant_mandate, mandate_entity
-from assistant.models.enums import reviewer_role
 
 
 class ReviewerAdmin(admin.ModelAdmin):
@@ -43,11 +42,11 @@ class ReviewerAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         form = super(ReviewerAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['entity'].queryset = \
-            entity_version.search_entities(type=entity_type.INSTITUTE) | \
-            entity_version.search_entities(type=entity_type.FACULTY) | \
-            entity_version.search_entities(type=entity_type.SECTOR) | \
-            entity_version.search_entities(type=entity_type.POLE) | \
-            entity_version.search_entities(type=entity_type.SCHOOL)
+            entity_version.search_entities(entity_type=entity_type.INSTITUTE) | \
+            entity_version.search_entities(entity_type=entity_type.FACULTY) | \
+            entity_version.search_entities(entity_type=entity_type.SECTOR) | \
+            entity_version.search_entities(entity_type=entity_type.POLE) | \
+            entity_version.search_entities(entity_type=entity_type.SCHOOL)
         return form
 
 
@@ -62,7 +61,7 @@ class Reviewer(models.Model):
 
 
 def find_reviewers():
-    return Reviewer.objects.all().order_by('person')
+    return Reviewer.objects.all().order_by('person__last_name')
 
 
 def find_by_id(reviewer_id):
@@ -70,22 +69,10 @@ def find_by_id(reviewer_id):
 
 
 def find_by_person(person):
-    return Reviewer.objects.get(person=person)
-
-
-def can_edit_review(reviewer_id, mandate_id):
-    if assistant_mandate.find_mandate_by_id(mandate_id).state not in find_by_id(reviewer_id).role:
-        return None
-
-    if not mandate_entity.find_by_mandate_and_entity(assistant_mandate.find_mandate_by_id(mandate_id),
-                                                     find_by_id(reviewer_id).entity):
-        if not mandate_entity.find_by_mandate_and_part_of_entity(
-                assistant_mandate.find_mandate_by_id(mandate_id), find_by_id(reviewer_id).entity):
-            return None
-        else:
-            return find_by_id(reviewer_id)
-    else:
-        return find_by_id(reviewer_id)
+    try:
+        return Reviewer.objects.get(person=person)
+    except Reviewer.DoesNotExist:
+        return False
 
 
 def find_by_role(role):
@@ -97,7 +84,7 @@ def find_by_entity_and_role(entity, role):
 
 
 def can_delegate_to_entity(reviewer, entity):
-    if reviewer.role != reviewer_role.SUPERVISION and reviewer.role != reviewer_role.RESEARCH:
+    if not can_delegate(reviewer):
         return False
     current_version = entity_version.get_last_version(entity)
     if entity == reviewer.entity:
@@ -109,7 +96,20 @@ def can_delegate_to_entity(reviewer, entity):
 
 
 def can_delegate(reviewer):
-    if reviewer.role != reviewer_role.SUPERVISION and reviewer.role != reviewer_role.RESEARCH:
-        return False
-    else:
-        return True
+    roles_who_can_delegate = [reviewer_role.SUPERVISION, reviewer_role.RESEARCH, reviewer_role.SUPERVISION_DAF]
+    return reviewer.role in roles_who_can_delegate
+
+
+def can_validate(reviewer):
+    roles_who_can_validate = [reviewer_role.SUPERVISION, reviewer_role.RESEARCH, reviewer_role.RESEARCH_ASSISTANT,
+                              reviewer_role.PHD_SUPERVISOR, reviewer_role.VICE_RECTOR,
+                              reviewer_role.VICE_RECTOR_ASSISTANT]
+    return reviewer.role in roles_who_can_validate
+
+
+def get_delegate_for_entity(reviewer, entity):
+    delegate_role = reviewer.role + '_ASSISTANT'
+    try:
+        return Reviewer.objects.get(role=delegate_role, entity=entity)
+    except Reviewer.DoesNotExist:
+        return None

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,12 +26,15 @@
 from base.models import *
 from django.contrib import admin
 
+from base.models.bibliography import Bibliography, BibliographyAdmin
 
 admin.site.register(academic_calendar.AcademicCalendar,
                     academic_calendar.AcademicCalendarAdmin)
 
 admin.site.register(academic_year.AcademicYear,
                     academic_year.AcademicYearAdmin)
+
+admin.site.register(Bibliography, BibliographyAdmin)
 
 admin.site.register(campus.Campus,
                     campus.CampusAdmin)
@@ -53,6 +56,9 @@ admin.site.register(education_group_year.EducationGroupYear,
 
 admin.site.register(entity.Entity,
                     entity.EntityAdmin)
+
+admin.site.register(entity_calendar.EntityCalendar,
+                    entity_calendar.EntityCalendarAdmin)
 
 admin.site.register(entity_component_year.EntityComponentYear,
                     entity_component_year.EntityComponentYearAdmin)
@@ -77,6 +83,9 @@ admin.site.register(external_offer.ExternalOffer,
 
 admin.site.register(group_element_year.GroupElementYear,
                     group_element_year.GroupElementYearAdmin)
+
+admin.site.register(learning_achievement.LearningAchievement,
+                    learning_achievement.LearningAchievementAdmin)
 
 admin.site.register(learning_class_year.LearningClassYear,
                     learning_class_year.LearningClassYearAdmin)
@@ -149,9 +158,6 @@ admin.site.register(person_entity.PersonEntity,
 
 admin.site.register(program_manager.ProgramManager,
                     program_manager.ProgramManagerAdmin)
-
-admin.site.register(proposal_folder.ProposalFolder,
-                    proposal_folder.ProposalFolderAdmin)
 
 admin.site.register(proposal_learning_unit.ProposalLearningUnit,
                     proposal_learning_unit.ProposalLearningUnitAdmin)

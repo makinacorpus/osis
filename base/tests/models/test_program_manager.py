@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -49,15 +49,15 @@ class FindByOfferYearTest(TestCase):
         self.offer_year = OfferYearFactory(academic_year=self.academic_year)
 
     def test_case_offer_is_none(self):
-        self.assertEquals(len(program_manager.find_by_offer_year(None)), 0)
+        self.assertEqual(len(program_manager.find_by_offer_year(None)), 0)
 
     def test_case_no_existing_program_manager_for_one_offer(self):
         offer_year = OfferYearFactory(academic_year=self.academic_year)
-        self.assertEquals(len(program_manager.find_by_offer_year(offer_year)), 0)
+        self.assertEqual(len(program_manager.find_by_offer_year(offer_year)), 0)
 
     def test_case_with_existing_program_manager(self):
         ProgramManagerFactory(offer_year=self.offer_year)
-        self.assertEquals(len(program_manager.find_by_offer_year(self.offer_year)), 1)
+        self.assertEqual(len(program_manager.find_by_offer_year(self.offer_year)), 1)
 
     def test_return_sorted_managers(self):
         ProgramManagerFactory(offer_year=self.offer_year, person=PersonFactory(first_name="Yannick", last_name="Leblanc"))
@@ -67,13 +67,13 @@ class FindByOfferYearTest(TestCase):
         ProgramManagerFactory(offer_year=self.offer_year, person=PersonFactory(first_name="Laura", last_name="Dupont"))
 
         managers = program_manager.find_by_offer_year(self.offer_year)
-        self.assertEquals(managers[0].person.last_name, "Dupont")
-        self.assertEquals(managers[1].person.last_name, "Ferreira")
-        self.assertEquals(managers[1].person.first_name, "Laura")
-        self.assertEquals(managers[2].person.last_name, "Ferreira")
-        self.assertEquals(managers[2].person.first_name, "Yannick")
-        self.assertEquals(managers[3].person.last_name, "Leblanc")
-        self.assertEquals(managers[4].person.last_name, "Uncle")
+        self.assertEqual(managers[0].person.last_name, "Dupont")
+        self.assertEqual(managers[1].person.last_name, "Ferreira")
+        self.assertEqual(managers[1].person.first_name, "Laura")
+        self.assertEqual(managers[2].person.last_name, "Ferreira")
+        self.assertEqual(managers[2].person.first_name, "Yannick")
+        self.assertEqual(managers[3].person.last_name, "Leblanc")
+        self.assertEqual(managers[4].person.last_name, "Uncle")
 
     def test_is_program_manager(self):
         user = UserFactory(username="PGRM_1")
@@ -95,7 +95,7 @@ class FindByOfferYearTest(TestCase):
         offer_yr = OfferYearFactory(academic_year=self.academic_year,
                                     entity_management=a_management_entity)
         ProgramManagerFactory(offer_year=offer_yr, person=PersonFactory())
-        self.assertEquals(len(program_manager.find_by_management_entity([a_management_entity], self.academic_year)), 1)
+        self.assertEqual(len(program_manager.find_by_management_entity([a_management_entity], self.academic_year)), 1)
 
     def test_find_by_person_exclude_offer_list(self):
         a_person = PersonFactory(first_name="Yannick", last_name="Leblanc")
@@ -111,7 +111,7 @@ class FindByOfferYearTest(TestCase):
                               person=a_person)
         ProgramManagerFactory(offer_year=offer_yr2,
                               person=a_person)
-        self.assertEquals(len(program_manager.find_by_person_exclude_offer_list(a_person,
+        self.assertEqual(len(program_manager.find_by_person_exclude_offer_list(a_person,
                                                                                 [offer_yr1],
                                                                                 self.academic_year)), 1)
 
@@ -119,4 +119,4 @@ class FindByOfferYearTest(TestCase):
         self.assertIsNone(program_manager.find_by_education_group(None))
         an_education_group = EducationGroupFactory()
         a_program_manager = ProgramManagerFactory(education_group=an_education_group)
-        self.assertEquals(list(program_manager.find_by_education_group(an_education_group)), [a_program_manager])
+        self.assertEqual(list(program_manager.find_by_education_group(an_education_group)), [a_program_manager])

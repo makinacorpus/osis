@@ -1,0 +1,7 @@
+<td>{{ component.volumes.VOLUME_REQUIREMENT_ENTITY | default_if_none:'' }}</td>
+{% if ADDITIONAL_REQUIREMENT_ENTITY_1 %}
+    <td>{{ component.volumes.VOLUME_ADDITIONAL_REQUIREMENT_ENTITY_1 | default_if_none:'' }}</td>
+{% endif %}
+{% if ADDITIONAL_REQUIREMENT_ENTITY_2 %}
+    <td>{{ component.volumes.VOLUME_ADDITIONAL_REQUIREMENT_ENTITY_2 | default_if_none:'' }}</td>
+{% endif %}

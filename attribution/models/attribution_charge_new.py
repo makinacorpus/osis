@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,11 +24,10 @@
 #
 ##############################################################################
 from django.db import models
+from django.contrib import admin
 
-from osis_common.models.auditable_model import AuditableModel, AuditableModelAdmin
 
-
-class AttributionChargeNewAdmin(AuditableModelAdmin):
+class AttributionChargeNewAdmin(admin.ModelAdmin):
     list_display = ('attribution', 'learning_component_year', 'allocation_charge')
     raw_id_fields = ('attribution', 'learning_component_year')
     search_fields = ['attribution__tutor__person__first_name', 'attribution__tutor__person__last_name',
@@ -38,14 +37,14 @@ class AttributionChargeNewAdmin(AuditableModelAdmin):
     list_filter = ('learning_component_year__type', 'attribution__learning_container_year__academic_year')
 
 
-class AttributionChargeNew(AuditableModel):
+class AttributionChargeNew(models.Model):
     external_id = models.CharField(max_length=100, blank=True, null=True)
     attribution = models.ForeignKey('AttributionNew')
     learning_component_year = models.ForeignKey('base.LearningComponentYear')
     allocation_charge = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True)
 
     def __str__(self):
-        return u"%s" % str(self.attribution)
+        return u"%s" % self.attribution
 
 
 def search(*args, **kwargs):

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,23 +35,12 @@ from base.models.enums import education_group_association
 from base.models.enums import offer_year_entity_type
 from base.models.enums import education_group_categories
 from base.models.exceptions import MaximumOneParentAllowedException
-from base.models.group_element_year import GroupElementYear
+from base.models.osis_model_admin import OsisModelAdmin
+from django.db.models import Count, Q
 
 
-class EducationGroupYearAdmin(admin.ModelAdmin):
+class EducationGroupYearAdmin(OsisModelAdmin):
     list_display = ('acronym', 'title', 'academic_year', 'education_group_type', 'changed')
-    fieldsets = ((None, {'fields': ('academic_year', 'acronym', 'partial_acronym', 'title', 'education_group_type',
-                                    'education_group', 'active', 'partial_deliberation', 'admission_exam',
-                                    'credits', 'funding', 'funding_direction', 'funding_cud', 'funding_direction_cud',
-                                    'academic_type', 'university_certificate', 'fee_type', 'enrollment_campus',
-                                    'main_teaching_campus', 'dissertation', 'internship',
-                                    'schedule_type', 'english_activities', 'other_language_activities',
-                                    'other_campus_activities', 'professional_title', 'joint_diploma',
-                                    'diploma_printing_orientation', 'diploma_printing_title',
-                                    'inter_organization_information', 'inter_university_french_community',
-                                    'inter_university_belgium', 'inter_university_abroad', 'primary_language',
-                                    'language_association', 'keywords', 'duration', 'duration_unit', 'title_english',
-                                    'enrollment_enabled', 'remark', 'remark_english')}),)
     list_filter = ('academic_year', 'education_group_type')
     raw_id_fields = ('education_group_type', 'academic_year', 'education_group', 'enrollment_campus',
                      'main_teaching_campus', 'primary_language')
@@ -109,6 +98,7 @@ class EducationGroupYear(models.Model):
                                      blank=True, null=True)
     enrollment_enabled = models.BooleanField(default=False)
     partial_acronym = models.CharField(max_length=15, db_index=True, null=True)
+    # TODO :: rename credits into expected_credits
     credits = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
     remark_english = models.TextField(blank=True, null=True)
@@ -153,13 +143,13 @@ class EducationGroupYear(models.Model):
 
     @property
     def parents_by_group_element_year(self):
-        group_elements_year = GroupElementYear.objects.filter(child_branch=self).select_related('parent')
+        group_elements_year = self.child_branch.filter(child_branch=self).select_related('parent')
         return [group_element_year.parent for group_element_year in group_elements_year
                 if group_element_year.parent]
 
     @property
     def children_by_group_element_year(self):
-        group_elements_year = GroupElementYear.objects.filter(parent=self).select_related('child_branch')
+        group_elements_year = self.parent.filter(parent=self).select_related('child_branch')
         return [group_element_year.child_branch for group_element_year in group_elements_year
                 if group_element_year.child_branch]
 
@@ -173,6 +163,7 @@ class EducationGroupYear(models.Model):
         if self.education_group_type:
             return self.education_group_type.category == education_group_categories.TRAINING
         return False
+
 
 def find_by_id(an_id):
     try:
@@ -207,3 +198,25 @@ def search(**kwargs):
         qs = qs.filter(partial_acronym__icontains=kwargs['partial_acronym'])
 
     return qs.select_related('education_group_type', 'academic_year')
+
+
+# TODO :: Annotate/Count() in only 1 query instead of 2
+# TODO :: Count() on category_type == MINI_TRAINING will be in the future in another field FK (or other table).
+def find_with_enrollments_count(learning_unit_year):
+    education_groups_years = _find_with_learning_unit_enrollment_count(learning_unit_year)
+    count_by_id = _count_education_group_enrollments_by_id(education_groups_years)
+    for educ_group in education_groups_years:
+        educ_group.count_formation_enrollments = count_by_id.get(educ_group.id) or 0
+    return education_groups_years
+
+
+def _count_education_group_enrollments_by_id(education_groups_years):
+    educ_groups = search(id=[educ_group.id for educ_group in education_groups_years]) \
+        .annotate(count_formation_enrollments=Count('offerenrollment')).values('id', 'count_formation_enrollments')
+    return {obj['id']: obj['count_formation_enrollments'] for obj in educ_groups}
+
+
+def _find_with_learning_unit_enrollment_count(learning_unit_year):
+    return EducationGroupYear.objects\
+        .filter(offerenrollment__learningunitenrollment__learning_unit_year_id=learning_unit_year)\
+        .annotate(count_learning_unit_enrollments=Count('offerenrollment__learningunitenrollment')).order_by('acronym')

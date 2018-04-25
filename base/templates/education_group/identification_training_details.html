@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@
                         <label>{% trans 'academic_type' %}</label><br>
                         {% if education_group_year.academic_type %}
                             {% trans education_group_year.academic_type %}
-                        {% else %}
+                        {% elif parent.academic_type %}
                             <strong class="text-primary">{% trans parent.academic_type %}</strong><br>
                         {% endif %}
                         <br><br>
@@ -197,24 +197,19 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label>{% trans 'acronym' %}</label><br>
-                        {% if education_group_year.acronym %}
-                            {{ education_group_year.acronym }}
-                        {% elif parent.acronym %}
-                            <strong class="text-primary">{{ parent.acronym }}</strong>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label>{% trans 'code'%}</label><br>
-                        {% if education_group_year.partial_acronym %}
-                            {{ education_group_year.partial_acronym }}
-                        {% elif parent.partial_acronym %}
-                            <strong class="text-primary">{{ parent.partial_acronym }}</strong>
-                        {% endif %}
-                    </div>
-                </div>
+                <label>{% trans 'acronym' %}</label><br>
+                {% if education_group_year.acronym %}
+                    {{ education_group_year.acronym }}
+                {% elif parent.acronym %}
+                    <strong class="text-primary">{{ parent.acronym }}</strong>
+                {% endif %}
+                <br><br>
+                <label>{% trans 'code'%}</label><br>
+                {% if education_group_year.partial_acronym %}
+                    {{ education_group_year.partial_acronym }}
+                {% elif parent.partial_acronym %}
+                    <strong class="text-primary">{{ parent.partial_acronym }}</strong>
+                {% endif %}
             </div>
         </div>
         <div class="panel panel-default">

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from ckeditor.widgets import CKEditorWidget
+
+from base.forms.common import set_trans_txt
 from cms.enums import entity_name
 from cms.models import translated_text
 from cms import models as mdl_cms
@@ -44,11 +46,7 @@ class EducationGroupGeneralInformationsForm(forms.Form):
 
     def load_initial(self):
         translated_texts_list = self._get_all_translated_text_related()
-
-        for trans_txt in translated_texts_list:
-            text_label = trans_txt.text_label.label
-            text = trans_txt.text if trans_txt.text else ""
-            setattr(self, text_label, mark_safe(text))
+        set_trans_txt(self, translated_texts_list)
 
     def _get_all_translated_text_related(self):
         language_iso = self.language[0]

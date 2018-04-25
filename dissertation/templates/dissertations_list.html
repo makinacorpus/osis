@@ -9,7 +9,7 @@
  * The core business involves the administration of students, teachers,
  * courses, programs and so on.
  *
- * Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+ * Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,8 @@
                   <th>{% trans 'dissertation_title'%}</th>
                   <th>{% trans 'author'%}</th>
                   <th>{% trans 'status'%}</th>
-                  <th>{% trans 'offer_year_start'%}</th>
+                  <th>{% trans 'offer'%}</th>
+                  <th>{% trans 'year_start'%}</th>
                 </tr>
                 {% for adviser_list_dissertation in adviser_list_dissertations %}
                   <tr>
@@ -76,7 +77,8 @@
                         <span class="label label-default">{{ adviser_list_dissertation.dissertation.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.acronym }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.academic_year }}</td>
                   </tr>
                 {% endfor %}
               </table>
@@ -92,7 +94,8 @@
                   <th>{% trans 'dissertation_title'%}</th>
                   <th>{% trans 'author'%}</th>
                   <th>{% trans 'status'%}</th>
-                  <th>{% trans 'offer_year_start'%}</th>
+                  <th>{% trans 'offer'%}</th>
+                  <th>{% trans 'year_start'%}</th>
                 </tr>
                 {% for adviser_list_dissertation in adviser_list_dissertations_copro %}
                   <tr>
@@ -117,7 +120,8 @@
                         <span class="label label-default">{{ adviser_list_dissertation.dissertation.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.acronym }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.academic_year }}</td>
                   </tr>
                 {% endfor %}
               </table>
@@ -133,7 +137,8 @@
                   <th>{% trans 'dissertation_title'%}</th>
                   <th>{% trans 'author'%}</th>
                   <th>{% trans 'status'%}</th>
-                  <th>{% trans 'offer_year_start'%}</th>
+                  <th>{% trans 'offer'%}</th>
+                  <th>{% trans 'year_start'%}</th>
                 </tr>
                 {% for adviser_list_dissertation in adviser_list_dissertations_reader %}
                   <tr>
@@ -158,7 +163,8 @@
                         <span class="label label-default">{{ adviser_list_dissertation.dissertation.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.acronym }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.academic_year }}</td>
                   </tr>
                 {% endfor %}
               </table>
@@ -174,7 +180,8 @@
                   <th>{% trans 'dissertation_title'%}</th>
                   <th>{% trans 'author'%}</th>
                   <th>{% trans 'status'%}</th>
-                  <th>{% trans 'offer_year_start'%}</th>
+                  <th>{% trans 'offer'%}</th>
+                  <th>{% trans 'year_start'%}</th>
                 </tr>
                 {% for adviser_list_dissertation in adviser_list_dissertations_accompanist %}
                   <tr>
@@ -199,7 +206,8 @@
                         <span class="label label-default">{{ adviser_list_dissertation.dissertation.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.acronym }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.academic_year }}</td>
                   </tr>
                 {% endfor %}
               </table>
@@ -215,7 +223,8 @@
                   <th>{% trans 'dissertation_title'%}</th>
                   <th>{% trans 'author'%}</th>
                   <th>{% trans 'status'%}</th>
-                  <th>{% trans 'offer_year_start'%}</th>
+                  <th>{% trans 'offer'%}</th>
+                  <th>{% trans 'year_start'%}</th>
                 </tr>
                 {% for adviser_list_dissertation in adviser_list_dissertations_internship %}
                   <tr>
@@ -240,7 +249,8 @@
                         <span class="label label-default">{{ adviser_list_dissertation.dissertation.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.acronym }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.academic_year }}</td>
                   </tr>
                 {% endfor %}
               </table>
@@ -256,7 +266,8 @@
                   <th>{% trans 'dissertation_title'%}</th>
                   <th>{% trans 'author'%}</th>
                   <th>{% trans 'status'%}</th>
-                  <th>{% trans 'offer_year_start'%}</th>
+                  <th>{% trans 'offer'%}</th>
+                  <th>{% trans 'year_start'%}</th>
                 </tr>
                 {% for adviser_list_dissertation in adviser_list_dissertations_president %}
                   <tr>
@@ -281,7 +292,8 @@
                         <span class="label label-default">{{ adviser_list_dissertation.dissertation.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.acronym }}</td>
+                    <td>{{ adviser_list_dissertation.dissertation.offer_year_start.academic_year }}</td>
                   </tr>
                 {% endfor %}
               </table>

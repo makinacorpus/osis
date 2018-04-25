@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ class Organization(SerializableModel):
     code = models.CharField(max_length=50, blank=True, null=True)
     acronym = models.CharField(max_length=20, blank=True, null=True)
     website = models.URLField(max_length=255, blank=True, null=True)
-    type = models.CharField(max_length=30, blank=True, null=True, choices=organization_type.ORGANIZATION_TYPE, default='UNKNOWN')
+    type = models.CharField(max_length=30, blank=True, null=True, choices=organization_type.ORGANIZATION_TYPE,
+                            default='UNKNOWN')
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
     prefix = models.CharField(max_length=30, blank=True, null=True)
@@ -61,7 +62,7 @@ def find_by_id(organization_id):
     return Organization.objects.get(pk=organization_id)
 
 
-def search(acronym=None, name=None, type=None, prefix=None):
+def search(acronym=None, name=None, type=None):
     out = None
     queryset = Organization.objects
 
@@ -74,20 +75,7 @@ def search(acronym=None, name=None, type=None, prefix=None):
     if type:
         queryset = queryset.filter(type=type)
 
-    if prefix:
-        queryset = queryset.filter(prefix=prefix)
-
-    if acronym or name or type or prefix:
+    if acronym or name or type:
         out = queryset
 
     return out
-
-
-def find_by_type(type, order_by=None):
-
-    if order_by:
-        queryset = Organization.objects.filter(type=type).order_by(*order_by)
-    else:
-        queryset = Organization.objects.filter(type=type)
-
-    return queryset

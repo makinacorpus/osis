@@ -6,7 +6,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 {% endcomment %}
 
 {% block messages %}
+    <!-- div to display message coming from Javascript function -->
+    <div id="message_info_container" class="alert alert-info" role="alert" style="visibility: hidden; display: none;"></div>
 
     {% as_messages_error as messages_error %}
     {% if messages_error %}
@@ -31,24 +33,13 @@
         <ul>
             {% for message in messages %}
                 {% if 'error' in message.tags %}
-                    <li {% if message.tags %}{% endif %}>{{ message }}</li>
+                    <li>
+                        {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                    </li>
                 {%endif%}
             {% endfor %}
         </ul>
     </div>
-    {% endif %}
-
-    {% as_messages_info as messages_info %}
-    {%if messages_info %}
-        <div id="pnl_info_messages" class="alert alert-info" role="alert">
-            <ul>
-                {% for message in messages %}
-                    {% if 'info' in message.tags %}
-                        <li {% if message.tags%}{% endif %}>{{ message }}</li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
     {% endif %}
 
     {% as_messages_warning as messages_warning %}
@@ -57,7 +48,9 @@
             <ul>
                 {% for message in messages %}
                     {% if 'warning' in message.tags %}
-                        <li {% if message.tags %}{% endif %}>{{ message }}</li>
+                        <li>
+                            {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                        </li>
                     {% endif %}
                 {% endfor %}
             </ul>
@@ -70,8 +63,25 @@
             <ul>
                 {% for message in messages %}
                     {% if 'success' in message.tags %}
-                        <li {% if message.tags %}{% endif %}>{{ message }}</li>
+                        <li>
+                            {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                        </li>
                     {%endif%}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% as_messages_info as messages_info %}
+    {%if messages_info %}
+        <div id="pnl_info_messages" class="alert alert-info" role="alert">
+            <ul>
+                {% for message in messages %}
+                    {% if 'info' in message.tags %}
+                        <li>
+                            {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                        </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>

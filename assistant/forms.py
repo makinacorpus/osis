@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -295,13 +295,11 @@ class AssistantFormPart6(ModelForm):
 
 class ReviewerDelegationForm(ModelForm):
     role = forms.CharField(widget=forms.HiddenInput(), required=True)
-    entity = forms.ModelChoiceField(widget=forms.HiddenInput(), required=True, queryset=(
-        entity.search(entity_type=entity_type.INSTITUTE) |
-        entity.search(entity_type=entity_type.FACULTY) |
-        entity.search(entity_type=entity_type.SCHOOL) |
-        entity.search(entity_type=entity_type.PLATFORM) |
-        entity.search(entity_type=entity_type.POLE)))
-
+    entities = \
+        entity.search(entity_type=entity_type.INSTITUTE) | entity.search(entity_type=entity_type.FACULTY) | \
+        entity.search(entity_type=entity_type.SCHOOL) | entity.search(entity_type=entity_type.PLATFORM) | \
+        entity.search(entity_type=entity_type.POLE)
+    entity = EntityChoiceField(required=True, queryset=base.models.entity.find_versions_from_entites(entities, None))
     class Meta:
         model = mdl.reviewer.Reviewer
         fields = ('entity', 'role')

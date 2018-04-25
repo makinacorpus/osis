@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ SCORES_EXAM_DIFFUSION = "SCORES_EXAM_DIFFUSION"
 SCORES_EXAM_SUBMISSION = "SCORES_EXAM_SUBMISSION"
 TEACHING_CHARGE_APPLICATION = "TEACHING_CHARGE_APPLICATION"
 COURSE_ENROLLMENT = "COURSE_ENROLLMENT"
+SUMMARY_COURSE_SUBMISSION = "SUMMARY_COURSE_SUBMISSION"
 
 ACADEMIC_CALENDAR_TYPES = (
     (DELIBERATION, DELIBERATION),
@@ -38,7 +39,8 @@ ACADEMIC_CALENDAR_TYPES = (
     (SCORES_EXAM_DIFFUSION, SCORES_EXAM_DIFFUSION),
     (SCORES_EXAM_SUBMISSION, SCORES_EXAM_SUBMISSION),
     (TEACHING_CHARGE_APPLICATION, TEACHING_CHARGE_APPLICATION),
-    (COURSE_ENROLLMENT, COURSE_ENROLLMENT))
+    (COURSE_ENROLLMENT, COURSE_ENROLLMENT),
+    (SUMMARY_COURSE_SUBMISSION, SUMMARY_COURSE_SUBMISSION))
 
 ACADEMIC_CALENDAR_TYPES_COLORS = {
     DELIBERATION: '#d9534f',

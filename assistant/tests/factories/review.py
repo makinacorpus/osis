@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class ReviewFactory(factory.DjangoModelFactory):
     mandate =  factory.SubFactory(AssistantMandateFactory)
     advice = factory.Iterator(review_advice_choices.REVIEW_ADVICE_CHOICES, getter=lambda c: c[0])
     status = review_status.DONE
-    if advice == review_advice_choices.CONDITIONAL:
+    if advice != review_advice_choices.FAVORABLE:
         justification = factory.Faker('text', max_nb_chars=50)
     changed = datetime.date.today()
     confidential = factory.Faker('text', max_nb_chars=50)

@@ -9,7 +9,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@
 	    <div class="form-group">
 		    <label for="search_persons">{% trans 'person' %}</label>
 			<input id="search_persons" name="search_persons" size="100" class="form-control"
-										  placeholder="{% trans 'search_by_email_or_last_name' %}">
+										  placeholder="{% trans 'search_by_email_or_last_name' %}" required>
 			<input type="hidden" name="person_id" id="person_id">
 		</div>
 		<div class="form-group">
@@ -61,6 +61,7 @@
 			<label for="{{ form.role.auto_id }}">{% trans 'role' %}</label>
 			{{ form.role }}<span class="error">{{ form.role.errors }}</span>
 		</div>
+		<input type="hidden" name="reviewer_id" id="reviewer.id" value="{{ reviewer.id }}">
 		<button type="submit" class="btn btn-primary" title="{% trans 'save'%}" id="bt_add_reviewer_save"
 				onclick="return confirm('{% trans 'confirm_reviewer_addition' %}')">
 			<span class="glyphicon glyphicon-save" aria-hidden="true"></span> {% trans 'save'%}</button>

@@ -1,0 +1,9 @@
+{% extends "learning_unit/learning_unit_layout.html" %}
+
+{% block submit %}
+    {% include "learning_unit/blocks/save_cancel_buttons_with_modal.html" %}
+{% endblock submit %}
+
+{% block modal %}
+    {% include "learning_unit/blocks/modal/modal_modification_ask_to_report.html" %}
+{% endblock modal %}

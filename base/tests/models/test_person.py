@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,10 +27,14 @@ import functools
 import contextlib
 import factory
 import datetime
+
+from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.test import override_settings
 from base.models import person
 from base.models.enums import person_source_type
+from base.models.person import CENTRAL_MANAGER_GROUP, FACULTY_MANAGER_GROUP, get_user_interface_language, \
+    change_language
 from base.tests.factories.person import PersonFactory, generate_person_email
 from base.tests.factories import user
 
@@ -57,6 +61,13 @@ class PersonTestCase(TestCase):
 
 
 class PersonTest(PersonTestCase):
+    def setUp(self):
+        self.an_user = user.UserFactory(username="user_without_person")
+        self.user_for_person = user.UserFactory(username="user_with_person")
+        self.person_with_user = PersonFactory(user=self.user_for_person, language="fr-be", first_name="John",
+                                              last_name="Doe")
+        self.person_without_user = PersonFactory(user=None)
+
     def test_find_by_id(self):
         tmp_person = PersonFactory()
         db_person = person.find_by_id(tmp_person.id)
@@ -122,7 +133,7 @@ class PersonTest(PersonTestCase):
         usr.save()
         a_person = create_person_with_user(usr)
         person.change_language(usr, 'ru')
-        self.assertNotEquals(a_person.language, "ru")
+        self.assertNotEqual(a_person.language, "ru")
 
     def test_change_language(self):
         usr = user.UserFactory()
@@ -131,11 +142,64 @@ class PersonTest(PersonTestCase):
 
         person.change_language(usr, "en")
         a_person = person.find_by_user(usr)
-        self.assertEquals(a_person.language, "en")
+        self.assertEqual(a_person.language, "en")
 
     def test_calculate_age(self):
         a_person = PersonFactory()
         a_person.birth_date = datetime.datetime.now() - datetime.timedelta(days=((30*365)+15))
-        self.assertEquals(person.calculate_age(a_person), 30)
+        self.assertEqual(person.calculate_age(a_person), 30)
         a_person.birth_date = datetime.datetime.now() - datetime.timedelta(days=((30*365)-5))
-        self.assertEquals(person.calculate_age(a_person), 29)
+        self.assertEqual(person.calculate_age(a_person), 29)
+
+    def test_is_central_manager(self):
+        a_person = PersonFactory()
+        self.assertFalse(a_person.is_central_manager())
+
+        a_person.user.groups.add(Group.objects.get(name=CENTRAL_MANAGER_GROUP))
+        self.assertTrue(a_person.is_central_manager())
+
+    def test_is_faculty_manager(self):
+        a_person = PersonFactory()
+        self.assertFalse(a_person.is_faculty_manager())
+
+        a_person.user.groups.add(Group.objects.get(name=FACULTY_MANAGER_GROUP))
+        self.assertTrue(a_person.is_faculty_manager())
+
+    def test_show_username_from_person_with_user(self):
+        self.assertEqual(self.person_with_user.username(), "user_with_person")
+
+    def test_show_username_from_person_without_user(self):
+        self.assertEqual(self.person_without_user.username(), None)
+
+    def test_show_first_name_from_person_with_first_name(self):
+        self.assertEqual(self.person_with_user.get_first_name(), self.person_with_user.first_name)
+
+    def test_show_first_name_from_person_without_first_name(self):
+        self.person_with_user.first_name = None
+        self.person_with_user.save()
+        self.assertEqual(self.person_with_user.get_first_name(), self.person_with_user.user.first_name)
+
+    def test_show_first_name_from_person_without_user(self):
+        self.person_with_user.first_name = None
+        self.person_with_user.user = None
+        self.person_with_user.save()
+        self.assertEqual(self.person_with_user.get_first_name(), "-")
+
+    def test_get_user_interface_language_with_person_user(self):
+        self.assertEqual(get_user_interface_language(self.person_with_user.user), "fr-be")
+
+    def test_get_user_interface_language_with_user_without_person(self):
+        self.assertEqual(get_user_interface_language(self.an_user), "fr-be")
+
+    def test_str_function_with_data(self):
+        self.person_with_user.middle_name = "Junior"
+        self.person_with_user.save()
+        self.assertEqual(self.person_with_user.__str__(),"DOE, John Junior")
+
+    def test_change_language_with_user_with_person(self):
+        change_language(self.user_for_person, "en")
+        self.person_with_user.refresh_from_db()
+        self.assertEqual(self.person_with_user.language, "en")
+
+    def test_change_language_with_user_without_person(self):
+        self.assertFalse(change_language(self.an_user, "en"))

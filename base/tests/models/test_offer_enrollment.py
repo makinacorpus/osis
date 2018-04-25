@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,13 @@
 #
 ##############################################################################
 import datetime
+from django.test import TestCase
 from base.models import offer_enrollment
+from base.tests.factories.person import PersonFactory
+from base.tests.factories.student import StudentFactory
+from base.tests.factories import academic_year
+from base.tests.factories.offer_year import OfferYearFactory
+from base.tests.factories.offer_enrollment import OfferEnrollmentFactory
 
 
 def create_date_enrollment():
@@ -36,3 +42,14 @@ def create_offer_enrollment(student, offer_year):
                                                            student=student, offer_year=offer_year)
     an_offer_enrollment.save()
     return an_offer_enrollment
+
+
+class OfferEnrollementTest(TestCase):
+    def test_find_by_offers_year(self):
+        student1 = StudentFactory.create()
+        offer_year1 = OfferYearFactory()
+        OfferEnrollmentFactory(student=student1, offer_year=offer_year1)
+        result = list(offer_enrollment.find_by_offers_years([offer_year1]))
+        self.assertEqual(result[0].student, student1)
+        self.assertEqual(result[0].offer_year, offer_year1)
+        self.assertEqual(len(result), 1)

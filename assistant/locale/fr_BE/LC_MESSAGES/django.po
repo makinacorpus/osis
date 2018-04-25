@@ -40,6 +40,9 @@ msgstr "Ajouter une unité d'enseignement"
 msgid "address"
 msgstr "Adresse"
 
+msgid "administrative_data"
+msgstr "Données administratives"
+
 msgid "advice"
 msgstr "Avis"
 
@@ -109,6 +112,9 @@ msgstr "Prix et/ou distinction(s)"
 msgid "bad_filename"
 msgstr "Le nom du fichier ne peut pas contenir : ( ) % $ , ; : / = +"
 
+msgid "bad_person_msg"
+msgstr "Veuillez sélectionner une personne dans la liste après avoir effectué une recherche"
+
 msgid "beginning"
 msgstr "Début"
 
@@ -126,6 +132,12 @@ msgstr "Choix"
 
 msgid "choose_person_as_reviewer_for"
 msgstr "Choisissez une personne comme évaluateur pour"
+
+msgid "columns_title_error"
+msgstr "Les titres des colonnes sont incorrects."
+
+msgid "columns_number_error"
+msgstr "Le nombre de colonnes est erroné."
 
 msgid "comment"
 msgstr "Commentaire"
@@ -193,6 +205,9 @@ msgstr "Tableau de bord"
 msgid "data_not_saved"
 msgstr "Un problème est survenu, les données n'ont pas pu être sauvegardées"
 
+msgid "date_format_error"
+msgstr "Une date est invalide dans le fichier"
+
 msgid "date_of_first_nomination"
 msgstr "Date de la première nomination"
 
@@ -223,6 +238,9 @@ msgstr "Gestion de l'envoi des courriels aux assistants et doyens de faculté"
 msgid "desc_lnk_export_mandates"
 msgstr "Exportation des dossiers vers un fichier XLSX"
 
+msgid "desc_lnk_export_mandates_pdf"
+msgstr "Exportation des données dans un fichier PDF"
+
 msgid "desc_lnk_import_mandates"
 msgstr "Importation des dossiers depuis un fichier XLSX"
 
@@ -246,6 +264,12 @@ msgstr "Courriels"
 
 msgid "end"
 msgstr "Fin"
+
+msgid "end_date_contract"
+msgstr "Date de fin du contrat"
+
+msgid "entry_date_contract"
+msgstr "Date de début du contrat"
 
 msgid "eq_fte"
 msgstr "Durée contrat (ETP)"
@@ -380,6 +404,9 @@ msgstr "La rubrique \"Unités d'enseignement\" doit être complétée"
 msgid "learning_units_description"
 msgstr "Exercices, TP, séminaires - associés aux heures de volume 2, que vous assumez personnellement"
 
+msgid "line_nbr"
+msgstr "à la ligne numéro : "
+
 msgid "mandate"
 msgstr "Mandat"
 
@@ -504,7 +531,7 @@ msgid "refused"
 msgstr "Désisté"
 
 msgid "registered_phd"
-msgstr "Inscrit au doctorat"
+msgstr "Inscrit·e au doctorat"
 
 msgid "remark"
 msgstr "Remarque"
@@ -554,10 +581,16 @@ msgstr "Remettre un avis"
 msgid "reviewer_delegation"
 msgstr "Délégation(s)"
 
+msgid "reviewer_delegation_add"
+msgstr "Ajout d'un délégué"
+
 msgid "reviewer_mandates_list"
 msgstr "Liste des dossiers"
 
 msgid "reviews"
+msgstr "Avis"
+
+msgid "review"
 msgstr "Avis"
 
 msgid "reviewer"
@@ -565,6 +598,9 @@ msgstr "Évaluateur"
 
 msgid "reviewer_todo"
 msgstr "Dossiers pouvant être traités"
+
+msgid "reviewer_with_same_role_already_exists_msg"
+msgstr "Un évaluateur pour ce rôle et cette entité existe déjà"
 
 msgid "reviewers"
 msgstr "Évaluateurs"
@@ -667,6 +703,13 @@ msgstr "Adresse email du promoteur"
 
 msgid "supervision_review"
 msgstr "Avis encadrement"
+
+msgid "SUPERVISION_DAF"
+msgstr "DAF"
+
+msgid "SUPERVISION_DAF_ASSISTANT"
+msgstr "Délégué de DAF"
+
 
 msgid "support_committee_reports"
 msgstr "Rapport du comité d'encadrement (obligatoire à partir de la deuxième demande de renouvellement)"

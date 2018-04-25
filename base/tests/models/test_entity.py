@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ import factory.fuzzy
 import datetime
 from django.utils import timezone
 from base.models import entity
+from base.models.entity import find_versions_from_entites
+from base.models.entity_version import EntityVersion
 from base.models.enums import entity_type
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -133,4 +135,17 @@ class EntityTest(TestCase):
                                                             with_entities=False)
         self.assertEqual(len(entities_with_descendants), 6)  # 4 for parent + 2 for parent_2
 
+    def test_most_recent_acronym(self):
+        entity_instance = EntityFactory()
+        most_recent_year = 2018
+        for year in range(2016, most_recent_year + 1):
+            date = datetime.date(year=year, month=1, day=1)
+            EntityVersionFactory(entity_id=entity_instance.id, start_date=date)
+        most_recent_date = datetime.date(year=most_recent_year, month=1, day=1)
+        most_recent_entity_version = EntityVersion.objects.get(start_date=most_recent_date,
+                                                               entity=entity_instance)
+        self.assertEqual(entity_instance.most_recent_acronym, most_recent_entity_version.acronym)
 
+    def test_find_versions_from_entites_with_date(self):
+        entities_list = find_versions_from_entites([self.parent.id], self.start_date)
+        self.assertEqual(len(entities_list), 1)

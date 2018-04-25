@@ -1,0 +1,14 @@
+{% load bootstrap3 %}
+{% load i18n %}
+
+<div class="col-md-2 col-md-offset-8">
+    <button type="submit" class="btn btn-primary">
+        {% trans 'save' %}
+    </button>
+</div>
+
+<div class="col-md-2">
+    <a href="{% url 'learning_unit' learning_unit_year.id %}" class="btn btn-default" role="button">
+        {% trans 'cancel' %}
+    </a>
+</div>

@@ -120,7 +120,7 @@ function get_browser() {
         return {name:'ie',version:(tem[1]||'')};
     }
     if(M[1]==='Chrome'){
-        tem=ua.match(/\bOPR\/(\d+)/)
+        tem=ua.match(/\bOPR\/(\d+)/);
         if(tem!=null)   {return {name:'opera', version:tem[1]};}
     }
     M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
@@ -138,7 +138,7 @@ var browser_supported_versions = {
     ie: 10,
     safari: 8,
     edge: 24
-}
+};
 
 function setEventKeepIds(domTableId, localStorageKey) {
     if(typeof localStorage!=undefined) {

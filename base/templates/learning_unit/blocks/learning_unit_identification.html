@@ -1,0 +1,17 @@
+{% load bootstrap3 %}
+
+<div class="row">
+    {% bootstrap_field learning_unit_year_form.acronym form_group_class="acronym-group col-md-5" %}
+    {% bootstrap_field learning_container_year_form.container_type form_group_class="col-md-4" %}
+    {% bootstrap_field learning_unit_year_form.status form_group_class="col-md-3" %}
+</div>
+
+<br>
+
+<div class="row">
+    {% if learning_unit_year_form.internship_subtype in learning_unit_year_form.visible_fields %}
+        {% bootstrap_field  learning_unit_year_form.internship_subtype form_group_class="col-md-6"%}
+    {% endif %}
+    {% bootstrap_field learning_unit_year_form.credits form_group_class="col-md-3" %}
+    {% bootstrap_field learning_container_year_form.language form_group_class="col-md-3" %}
+</div>

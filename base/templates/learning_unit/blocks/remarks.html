@@ -1,0 +1,14 @@
+{% load bootstrap3 %}
+{% load i18n %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <label>{% trans 'remarks_title' %}</label>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            {% bootstrap_field learning_unit_form.faculty_remark form_group_class="col-md-6" %}
+            {% bootstrap_field learning_unit_form.other_remark form_group_class="col-md-6" %}
+        </div>
+    </div>
+</div>

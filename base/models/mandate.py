@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,12 +26,11 @@
 from base.models.enums import mandate_type as mandate_types
 from django.db import models
 from django.contrib import admin
+from base.models.osis_model_admin import OsisModelAdmin
 
 
-class MandateAdmin(admin.ModelAdmin):
+class MandateAdmin(OsisModelAdmin):
     list_display = ('education_group', 'function')
-    fieldsets = ((None, {'fields': ('education_group',
-                                    'function')}),)
 
     raw_id_fields = ('education_group',)
     search_fields = ['education_group', 'function', 'external_id']

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,18 +34,21 @@ from django.views.decorators.http import require_http_methods
 from openpyxl import load_workbook
 
 from assessments.business import score_encoding_list
+from assessments.business.score_encoding_export import HEADER
 from assessments.forms.score_file import ScoreFileForm
 from attribution import models as mdl_attr
 from base import models as mdl
 from base.models.enums import exam_enrollment_justification_type as justification_types
 
-col_academic_year = 0
-col_session = 1
-col_learning_unit = 2
-col_offer = 3
-col_registration_id = 4
-col_score = 7
-col_justification = 8
+
+col_academic_year = HEADER.index('academic_year')
+col_session = HEADER.index('session_title')
+col_learning_unit = HEADER.index('learning_unit')
+col_offer = HEADER.index('program')
+col_registration_id = HEADER.index('registration_number')
+col_email = HEADER.index('email')
+col_score = HEADER.index('numbered_score')
+col_justification = HEADER.index('justification')
 
 REGISTRATION_ID_LENGTH = 8
 
@@ -179,6 +182,7 @@ def __save_xls_scores(request, file_name, learning_unit_year_id):
                                   learn_unit_acronyms_managed = learn_unit_acronyms_managed_by_user,
                                   registration_ids_managed = registration_ids_managed_by_user,
                                   learning_unit_year=learning_unit_year)
+            _check_consistency_data(row)
             updated_row = _update_row(request.user, row, enrollments_grouped, is_program_manager)
             if updated_row:
                 new_scores_number+=1
@@ -219,6 +223,10 @@ def _extract_registration_id(row):
         xls_registration_id = str(row[col_registration_id].value)
         return xls_registration_id.zfill(REGISTRATION_ID_LENGTH)
     return None
+
+
+def _extract_email(row):
+    return str(row[col_email].value)
 
 
 def _group_exam_enrollments_by_registration_id_and_learning_unit_year(enrollments):
@@ -269,6 +277,18 @@ def _check_intergity_data(row, **kwargs):
         else:
             # ... if it's beacause the registration id doesn't exist
             raise UploadValueError("%s" % _('registration_id_not_access_or_not_exist'), messages.ERROR)
+
+
+def _check_consistency_data(row):
+    xls_registration_id = _extract_registration_id(row)
+    xls_email = _extract_email(row)
+    if not _registration_id_matches_email(xls_registration_id, xls_email):
+        raise UploadValueError("%s" % _('registration_id_does_not_match_email'), messages.ERROR)
+
+
+def _registration_id_matches_email(registration_id, email):
+    student_by_registration_id = mdl.student.find_by_registration_id(registration_id)
+    return str(student_by_registration_id.person.email).strip() == email.strip()
 
 
 def _update_row(user, row, enrollments_managed_grouped, is_program_manager):

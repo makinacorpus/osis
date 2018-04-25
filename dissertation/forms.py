@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -119,7 +119,8 @@ class ManagerOfferPropositionForm(ModelForm):
         fields = ('offer', 'acronym', 'adviser_can_suggest_reader', 'validation_commission_exists',
                   'student_can_manage_readers', 'evaluation_first_year', 'start_visibility_proposition',
                   'end_visibility_proposition', 'start_visibility_dissertation', 'end_visibility_dissertation',
-                  'start_jury_visibility', 'end_jury_visibility', 'start_edit_title', 'end_edit_title')
+                  'start_jury_visibility', 'end_jury_visibility', 'start_edit_title', 'end_edit_title',
+                  'global_email_to_commission')
         widgets = {'offer': forms.HiddenInput(), 'acronym': forms.HiddenInput()}
 
 

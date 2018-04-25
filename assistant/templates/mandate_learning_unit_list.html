@@ -9,7 +9,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@
             {% for learning_unit in object_list %}
                 <td>{{ learning_unit.learning_unit_year.academic_year }}</td>
                 <td>{{ learning_unit.learning_unit_year.acronym }}</td>
-                <td>{{ learning_unit.learning_unit_year.title }}</td>
+                <td>{{ learning_unit.learning_unit_year.complete_title}}</td>
                 <td><a href="{% url 'tutoring_learning_unit_edit' learning_unit.id %}">
                     <button type="button" class="btn btn-link btn-lg" title="{% trans 'edit'%}"
                             id="bt_learning_unit_edit">

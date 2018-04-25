@@ -70,6 +70,9 @@ msgstr "Add subject"
 msgid "add_proposition_dissertation_jury_member"
 msgstr "Add jury member"
 
+msgid "add_success"
+msgstr "successfully added"
+
 msgid "advanced_search"
 msgstr "Advanced search"
 
@@ -285,6 +288,9 @@ msgstr "Settings of the Dissertation application"
 
 msgid "desc_lnk_manager_proposition_dissertations"
 msgstr "Dissertation subjects submitted by teachers"
+
+msgid "desc_lnk_manager_students_list"
+msgstr "List of students"
 
 msgid "desc_lnk_propositions_dissertations"
 msgstr "Dissertation subjects submitted by myself and others teachers"
@@ -574,6 +580,9 @@ msgstr "Max number of students"
 msgid "max_students_number"
 msgstr "Indicative number of places for this subject"
 
+msgid "maximum_jury"
+msgstr "Maximum number of members of the jury reached"
+
 msgid "mgr_com_accept_confirmation_message"
 msgstr "You are ready to set this dissertation as accepted by the commission.  Are you sure you want to continue ?"
 
@@ -811,6 +820,9 @@ msgstr "Save"
 msgid "search"
 msgstr "Search"
 
+msgid "status_or_adviser_error"
+msgstr "The status or the teacher are missing"
+
 msgid "search_person_explanation"
 msgstr "This screen allows you to add, in the dissertation application, as a teacher, a person who did not logged into the application. Please search the person with her/his e-mail address"
 
@@ -831,6 +843,9 @@ msgstr "Check the programs related to this topic"
 
 msgid "select_program_first"
 msgstr "Please select Start Program/Year first"
+
+msgid "send_email_to_commission_accepted"
+msgstr "Send an email to reading commission when acceptation of evaluation commission"
 
 msgid "september"
 msgstr "September"
@@ -981,3 +996,6 @@ msgstr "yes,no"
 
 msgid "you_have"
 msgstr "You have"
+
+msgid "year_start"
+msgstr "year beginning"

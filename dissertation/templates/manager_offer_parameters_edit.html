@@ -9,7 +9,7 @@
  * The core business involves the administration of students, teachers,
  * courses, programs and so on.
  *
- * Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+ * Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,6 +153,16 @@
                 </div>
                 <div class="col-md-5">
                     <label for="txt_validation_commission_exists">{% trans 'validation_commission_exists' %}</label>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-1">
+                    <input class="form-control" id="txt_global_email_to_commission"  name="global_email_to_commission"
+                           style="margin:-6px;" type="checkbox" {% if form.global_email_to_commission.value %} checked {% endif %}>
+                </div>
+                <div class="col-md-5">
+                    <label for="txt_global_email_to_commission">{% trans 'send_email_to_commission_accepted' %}</label>
                 </div>
             </div>
             <br>

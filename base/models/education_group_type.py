@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,29 +27,44 @@ from django.db import models
 from django.contrib import admin
 
 from base.models.enums import education_group_categories
+from base.models.osis_model_admin import OsisModelAdmin
 
 
-class EducationGroupTypeAdmin(admin.ModelAdmin):
+GROUP_TYPE_OPTION = 'Option'
+
+
+class EducationGroupTypeAdmin(OsisModelAdmin):
     list_display = ('name', 'category', )
-    fieldsets = ((None, {'fields': ('name', 'category', )}),)
     list_filter = ('name', 'category', )
     search_fields = ['name', 'category']
 
 
 class EducationGroupType(models.Model):
     external_id = models.CharField(max_length=100, blank=True, null=True)
-    category = models.CharField(max_length=25, choices=education_group_categories.CATEGORIES, default=education_group_categories.TRAINING)
+    category = models.CharField(max_length=25, choices=education_group_categories.CATEGORIES,
+                                default=education_group_categories.TRAINING)
     name = models.CharField(max_length=255)
 
     def __str__(self):
         return u"%s" % self.name
 
 
+def search(**kwargs):
+    queryset = EducationGroupType.objects
+
+    if 'category' in kwargs:
+        queryset = queryset.filter(category=kwargs['category'])
+
+    return queryset
+
+
 def find_all():
     return EducationGroupType.objects.order_by('name')
 
+
 def find_by_category(category=None):
-    return EducationGroupType.objects.filter(category=category).order_by('name')
+    return search(category=category).order_by('name')
+
 
 def find_by_name(name=None):
     return EducationGroupType.objects.filter(name=name)

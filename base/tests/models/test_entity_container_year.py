@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -189,14 +189,14 @@ class EntityContainerYearTest(TestCase):
                                    entity=allocation_entity,
                                    type=entity_container_year_link_type.ALLOCATION_ENTITY)
 
-        additional_entity_1 = EntityFactory()
+        additional_requirement_entity_1 = EntityFactory()
         EntityContainerYearFactory(learning_container_year=a_learning_container_year,
-                                   entity=additional_entity_1,
+                                   entity=additional_requirement_entity_1,
                                    type=entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_1)
 
-        additional_entity_2 = EntityFactory()
+        additional_requirement_entity_2 = EntityFactory()
         EntityContainerYearFactory(learning_container_year=a_learning_container_year,
-                                   entity=additional_entity_2,
+                                   entity=additional_requirement_entity_2,
                                    type=entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_2)
 
         entities_by_linktype = entity_container_year.find_entities_grouped_by_linktype(a_learning_container_year)
@@ -204,8 +204,8 @@ class EntityContainerYearTest(TestCase):
         expected_result = {
             entity_container_year_link_type.REQUIREMENT_ENTITY: requirement_entity,
             entity_container_year_link_type.ALLOCATION_ENTITY: allocation_entity,
-            entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_1: additional_entity_1,
-            entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_2: additional_entity_2
+            entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_1: additional_requirement_entity_1,
+            entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_2: additional_requirement_entity_2
         }
 
         self.assertDictEqual(entities_by_linktype, expected_result)

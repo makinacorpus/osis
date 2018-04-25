@@ -955,6 +955,9 @@ msgstr "Rechercher/mettre à jour la liste"
 msgid "registration_id"
 msgstr "NOMA"
 
+msgid "registration_id_does_not_match_email"
+msgstr "Le NOMA ne correspond pas à l'email"
+
 msgid "identification_number"
 msgstr "Matricule"
 
@@ -1071,9 +1074,6 @@ msgstr "Une erreur innatendue s'est produite"
 msgid "server_error_message"
 msgstr "Nous mettons tout en oeuvre pour résoudre ce problème."
 
-msgid "sessionn"
-msgstr "Session"
-
 msgid "short_title"
 msgstr "Titre abrégé"
 
@@ -1148,6 +1148,9 @@ msgstr "Sauvegarde temporaire (non soumis à la faculté)"
 
 msgid "the_coordinator_must_still_submit_scores"
 msgstr "Le coordinateur doit toujours soumettre les notes"
+
+msgid "text"
+msgstr "Texte"
 
 msgid "title"
 msgstr "Intitulé"
@@ -1612,8 +1615,20 @@ msgstr "Cette fonctionnalité est en phase expérimentale"
 msgid "title_official_1"
 msgstr "Intitulé officiel (partie 1 commune aux partims)"
 
+msgid "common_official_title"
+msgstr "Intitulé officiel commun"
+
+msgid "common_official_english_title"
+msgstr "Intitulé officiel commun en anglais"
+
 msgid "title_official_2"
 msgstr "Intitulé officiel (partie 2 propre au partim)"
+
+msgid "official_title_proper_to_UE"
+msgstr "Intitulé officiel propre à l'UE"
+
+msgid "official_english_title_proper_to_UE"
+msgstr "Intitulé officiel en anglais propre à l'UE"
 
 msgid "title_in_english"
 msgstr "Intitulé en anglais"
@@ -1683,6 +1698,12 @@ msgstr "Avec ent. subord."
 
 msgid "additional_requirement_entity"
 msgstr "Entité resp. cahier de charges complémentaire"
+
+msgid "additional_requirement_entity_1"
+msgstr "Entité resp. cahier de charges complémentaire 1"
+
+msgid "additional_requirement_entity_2"
+msgstr "Entité resp. cahier de charges complémentaire 2"
 
 msgid "academic_end_year"
 msgstr "Anac de fin"
@@ -1793,18 +1814,19 @@ msgid "create_learning_unit"
 msgstr "Création d'une unité d'enseignement"
 
 msgid "existed_acronym"
-msgstr "Sigle a déjà existé pour "
+msgstr "Code a déjà existé pour "
 
 msgid "existing_acronym"
-msgstr "Sigle déja existant"
+msgstr "Code déjà existant en "
 
 msgid "invalid_acronym"
-msgstr "Sigle non valide"
+msgstr "Code non valide"
 
 msgid "acronym_rules"
-msgstr "Site en une lettre\n"
-       "Sigle en min 2 et max 4 lettres\n"
-       "Code numérique en 4 chiffres"
+msgstr "Code composé de:\n"
+       "site: 1 lettre\n"
+       "partie alphabétique: 2 à 4 lettres\n"
+       "partie numérique: 4 chiffres"
 
 msgid "end_year_title"
 msgstr "Année de fin"
@@ -1888,16 +1910,16 @@ msgid "end_date_gt_begin_date"
 msgstr "L'année de fin doit etre égale ou supérieur à l'année de départ"
 
 msgid "session_title"
-msgstr "Session"
+msgstr "Sessions"
 
 msgid "remarks_title"
 msgstr "Remarques"
 
 msgid "faculty_remark"
-msgstr "Faculté"
+msgstr "Remarque de faculté"
 
 msgid "other_remark"
-msgstr "Autre"
+msgstr "Autre remarque"
 
 msgid "new_learning_unit"
 msgstr "Nouvelle unité d'enseignement"
@@ -2215,8 +2237,8 @@ msgstr "%(subtype)s %(acronym)s est attribué(e) à %(tutor)s l’année %(year)
 msgid "%(subtype)s %(acronym)s is assigned to the assistant %(assistant)s for the year %(year)s"
 msgstr "%(subtype)s %(acronym)s est attribué(e) à l'assistant %(assistant)s l'année %(year)s"
 
-msgid "%(subtype)s %(acronym)s is included in the group %(group)s of the program %(program)s for the year %(year)s"
-msgstr "%(subtype)s %(acronym)s est repris dans le groupement %(group)s du programme %(program)s l’année %(year)s"
+msgid "lu_included_in_group"
+msgstr "%(subtype)s %(acronym)s est repris dans le groupement %(group)s l’année %(year)s"
 
 msgid "The learning unit %(acronym)s is related to the internship speciality %(speciality)s"
 msgstr "L'unité d'enseignement %(acronym)s est liée à la spécialité de stage %(speciality)s"
@@ -2312,7 +2334,7 @@ msgid "scores_diffusion"
 msgstr "Diffusion des notes"
 
 msgid "session"
-msgstr "Session"
+msgstr "session"
 
 msgid "at"
 msgstr "à"
@@ -2356,6 +2378,14 @@ msgstr "Refusé"
 msgid "success_modification_proposal"
 msgstr "Une proposition de modification de type {} a été faite pour l'unité d'enseignement {}."
 
+msgid "proposal_edited_successfully"
+msgstr "Proposition modifiée avec succès"
+
+msgid "proposals_cancelled_successfully"
+msgstr "Propositions annulées avec succès"
+
+msgid "proposals_consolidated_successfully"
+msgstr "Propositions consolidées avec succès"
 
 msgid "content"
 msgstr "Contenu"
@@ -2423,6 +2453,9 @@ msgstr "p23"
 msgid "Put in proposal"
 msgstr "Mettre en proposition"
 
+msgid "Put in suppression proposal"
+msgstr "Mettre en proposition de suppression"
+
 msgid "Proposal for modification"
 msgstr "Proposition de modification"
 
@@ -2447,11 +2480,14 @@ msgstr "Xls avec les activités"
 msgid "%(date)s must be set within %(start_date)s and %(end_date)s"
 msgstr "%(date)s doit être comprise entre %(start_date)s et %(end_date)s"
 
-msgid "success_cancel_proposal"
-msgstr "La proposition pour {} a été annulée."
-
 msgid "cancel_proposal"
 msgstr "Annuler proposition"
+
+msgid "edit_proposal"
+msgstr "Editer proposition"
+
+msgid "Consolidate proposal"
+msgstr "Consolider proposition"
 
 msgid "msg_confirm_cancel_proposal"
 msgstr "Etes-vous certain de vouloir annuler la proposition ?"
@@ -2459,3 +2495,367 @@ msgstr "Etes-vous certain de vouloir annuler la proposition ?"
 msgid "The administrative data has been successfully modified"
 msgstr "Les données administratives ont été sauvées avec succès"
 
+msgid "vacant"
+msgstr "Vacant"
+
+msgid "team_management"
+msgstr "Gestion par équipe"
+
+msgid "type_declaration_vacant"
+msgstr "Décision"
+
+msgid "procedure"
+msgstr "Procédure"
+
+msgid "educational_information_management"
+msgstr "Gestion des informations pédagogiques"
+
+msgid "SUMMARY_COURSE_SUBMISSION"
+msgstr "Soumission des résumés de cours"
+
+msgid "INTERNAL_TEAM"
+msgstr "Interne/Equipe"
+
+msgid "substitute"
+msgstr "Suppléé"
+
+msgid "not_end_year"
+msgstr "pas de fin prévue"
+
+msgid "edit_learning_unit_end_date"
+msgstr "Modifier la date de fin l'unité d'enseignement"
+
+msgid "new_partim"
+msgstr "Créer un nouveau partim"
+
+msgid "partim"
+msgstr "Partim"
+
+msgid "partim_character_rules"
+msgstr "Identifiant partim: 1 lettre ou 1 chiffre"
+
+msgid "invalid_partim_character"
+msgstr "Caractère déjà utilisé"
+
+msgid "learning_unit_successfuly_created"
+msgstr "Unité d'enseignement <a href='%(link)s'> %(acronym)s (%(academic_year)s) </a> créée avec succès."
+
+msgid "learning_unit_successfuly_deleted"
+msgstr "Unité d'enseignement {acronym} ({academic_year}) supprimée avec succès."
+
+msgid "learning_unit_creation_academic_year_max_error"
+msgstr "Impossible de créer une UE dont l'année académique est supérieure à {}."
+
+msgid "parent_greater_than_partim"
+msgstr "L'année de fin selectionnée (%(partim_end_year)s) est plus grande que l'année de fin du parent %(lu_parent)s"
+
+msgid "learning_unit_created"
+msgstr "L'unité d'enseignement %(learning_unit)s créée pour l'année academique %(academic_year)s"
+
+msgid "learning_unit_updated"
+msgstr "Unité d'enseignement {acronym} mise à jour avec succès"
+
+msgid "partim_greater_than_parent"
+msgstr "L'unité d'enseignement %(learning_unit)s a un partim %(partim)s avec une année de fin plus grande que %(year)s"
+
+msgid "remark"
+msgstr "Remarque"
+
+msgid "remark_english"
+msgstr "Remarque en anglais"
+
+msgid "Ensure this value is less than %(limit_value)s."
+msgstr "Assurez-vous que cette valeur est inférieure à %(limit_value)s."
+
+msgid "Ensure this value is greater than %(limit_value)s."
+msgstr "Assurez-vous que cette valeur est supérieure à %(limit_value)s."
+
+msgid "Entity_not_exist"
+msgstr "L'entité %(entity_acronym)s n'existe pas pour l'année académique sélectionnée %(academic_year)s"
+
+msgid "edit_learning_unit"
+msgstr "Modifier l'unité d'enseignement"
+
+msgid "requirement_entity_end_date_too_short"
+msgstr "La durée de vie de l'entité responsable cahier de charges est trop courte."
+
+msgid "requirement_and_allocation_entities_cannot_be_different"
+msgstr "L'entité responsable cahier de charges et celle d'attribution ne peuvent pas être différentes pour ce type d'unite d'enseignement."
+
+msgid "success_modification_learning_unit"
+msgstr "L'unité d'enseignement a été modifiée."
+
+msgid "error_modification_learning_unit"
+msgstr "Erreur lors de la modification de l'unité d'enseignement."
+
+msgid "cannot_set_internship_subtype_for_type_other_than_internship"
+msgstr "Le sous-type de stage ne peut pas être séléctionnné pour un type d'unité d'enseignement autre que stage."
+
+msgid "%(subtype)s %(acronym)s is in proposal for the year %(year)s"
+msgstr "%(subtype)s %(acronym)s est en proposition pour l'année %(year)s"
+
+msgid "volume_have_more_than_2_decimal_places"
+msgstr "Le volume a plus de 2 décimales"
+
+msgid "Site"
+msgstr "Site"
+
+msgid "proposal_type"
+msgstr "Type proposition"
+
+msgid "proposal_status"
+msgstr "Etat proposition"
+
+msgid "folder_entity"
+msgstr "Sigle dossier"
+
+msgid "proposals_search"
+msgstr "Recherche - Propositions"
+
+msgid "folder_num"
+msgstr "N° dossier"
+
+msgid "ask_to_report_modification"
+msgstr "Voulez-vous reporter les modifications faites pour les années suivantes ?"
+
+msgid "proposal_learning_unit_successfuly_created"
+msgstr "Proposition d'unité d'enseignement <a href='%(link)s'> %(acronym)s (%(academic_year)s) </a> créée avec succès."
+
+msgid "new_learning_unit_proposal"
+msgstr "Nouvelle proposition d'unité d'enseignement"
+
+msgid "proposal_creation"
+msgstr "Proposition de création"
+
+msgid "proposal_update"
+msgstr "Modification de proposition"
+
+msgid "value_before_proposal"
+msgstr "Valeur avant proposition"
+
+msgid "entity_not_found"
+msgstr "Entité non-trouvée.  Il y a peut-être une erreur dans les données"
+
+msgid "min_for_field"
+msgstr "Veuillez entrer une valeur supérieure ou égale à 0."
+
+msgid "max_for_field"
+msgstr "Veuillez entrer une valeur inférieur ou égale à 500."
+
+msgid "force_state"
+msgstr "Forcer l'état"
+
+msgid "do_you_want_change_status_proposals"
+msgstr "Voulez-vous changer le statut de ces propositions?"
+
+msgid "are_you_sure_to_change_state_from"
+msgstr "Êtes-vous sûr de vouloir changer l'état de"
+
+msgid "must_set_common_title_or_specific_title"
+msgstr "L'intitulé officiel ou l'intitulé commun est requis."
+
+msgid "learning_unit_in_proposal_cannot_save"
+msgstr "L'unité d'enseignement %(luy)s est en proposition, impossible de sauvegarder le changement à partir de l'année %(academic_year)s"
+
+msgid "in_proposal"
+msgstr "En proposition"
+
+msgid "by"
+msgstr "Par"
+
+msgid "summary_locked"
+msgstr "mise-à-jour bloquée"
+
+msgid "get_back_to_initial"
+msgstr "Retour à l'état initial"
+
+msgid "do_you_want_to_get_back_to_initial"
+msgstr "Voulez-vous retourner à l'état initial?"
+
+msgid "error_proposal_suppression_to_initial"
+msgstr "Erreur lors du retour à l'initial. Une des propositions sélectionnées n'est pas de type SUPPRESSION. Rien n'a été fait"
+
+msgid "error_proposal_no_data"
+msgstr "Erreur lors du retour à l'initial. Aucune donnée sélectionnée valide"
+
+msgid "msg_confirm_delete_luy"
+msgstr "Etes-vous certain de vouloir supprimer définitivement cette unité d'enseignement ?"
+
+msgid "already_existing_acronym"
+msgstr "Sigle déjà existant"
+
+msgid "The value of field '%(field)s' is different between year %(year)s - %(value)s and year %(next_year)s - %(next_value)s"
+msgstr "La valeur du champ '%(field)s' différe entre l'année %(year)s - %(value)s et l'année %(next_year)s - %(next_value)s"
+
+msgid "There is not the learning unit %(acronym)s - %(next_year)s"
+msgstr "Il n'existe pas d'unité d'enseigmenent %(acronym)s - %(next_year)s"
+
+msgid "The value of field '%(field)s' for the learning unit %(acronym)s (%(component_type)s) is different between year %(year)s - %(value)s and year %(next_year)s - %(next_value)s"
+msgstr "La valeur du champ '%(field)s'de l'unité d'enseignement %(acronym)s (%(component_type)s) différe entre l'année %(year)s - %(value)s et l'année %(next_year)s - %(next_value)s"
+
+msgid "There is not %(component_type)s for the learning unit %(acronym)s - %(year)s but exist in %(existing_year)s"
+msgstr "Il n'y a pas de %(component_type)s pour l'unité d'enseignement %(acronym)s - %(year)s mais existe en %(existing_year)s"
+
+msgid "Educational information opening"
+msgstr "Ouverture informations pédagoqiques"
+
+msgid "Educational information ending"
+msgstr "Fermeture informations pédagoqiques"
+
+msgid "official_title_proper_to_partim"
+msgstr "Intitulé officiel propre au partim"
+
+msgid "official_english_title_proper_to_partim"
+msgstr "Intitulé officiel en anglais propre au partim"
+
+msgid "Educational information submission dates updated"
+msgstr "Date de soumission des informations pédagogiques mis à jour"
+
+msgid "partim_credits_gt_parent_credits"
+msgstr "Le nombre de crédits est supérieur à celui de l'unité d'enseignement"
+
+msgid "partim_credits_equals_parent_credits"
+msgstr "Le nombre de crédits est égal à celui de l'unité d'enseignement"
+
+msgid "The learning unit has been updated until %(year)s."
+msgstr "L'unité d'enseignement a été modifiée jusqu'en %(year)s."
+
+msgid "Prohibition to delete a learning unit before 2015."
+msgstr "Interdiction de supprimer une unité d'enseignement avant 2015."
+
+msgid "The entity '%(acronym)s' doesn't exist anymore in %(year)s"
+msgstr "L'entité '%(acronym)s' n'existe plus en %(year)s"
+
+msgctxt "bibliography"
+msgid "title"
+msgstr "titre"
+
+msgctxt "bibliography"
+msgid "mandatory"
+msgstr "obligatoire"
+
+msgid "Bibliography"
+msgstr "Bibliographie"
+
+msgid "Modalities specific to IN and OUT mobility"
+msgstr "Modalités propores à la mobilité IN et OUT"
+
+msgid "updated"
+msgstr "Mis à jour"
+
+msgid "unupdated"
+msgstr "Pas à jour"
+
+msgid "summary_list"
+msgstr "Statut des informations pédagogiques"
+
+msgid "The partim must be inactive because the parent is inactive"
+msgstr "Le partim doit être inactif car le cours complet est inactif"
+
+msgid "The parent must be active because there are partim active"
+msgstr "Le cours complet doit être actif car un partim est actif"
+
+msgid "educational_information_update_reminder"
+msgstr "Mail de rappel résumés"
+
+msgid "do_you_want_to_sent_email"
+msgstr "Voulez-vous envoyer un email de rappel?"
+
+msgid "desc_mail_reminder"
+msgstr "Envoyer un email de rappel pour la mise à jour des informations pédagogiques"
+
+msgid "success_mail_reminder"
+msgstr "Messages de rappel envoyés"
+
+msgid "consolidate"
+msgstr "Consolider"
+
+msgid "do_you_want_to_consolidate"
+msgstr "Voulez-vous consolider ?"
+
+msgid "need_no_reminder"
+msgstr "Pas besoin de rappel tout est en ordre"
+
+msgid "Proposal %(acronym)s (%(academic_year)s) cannot be consolidated."
+msgstr "Proposition %(acronym)s (%(academic_year)s) ne peut pas être consolidée."
+
+msgid "Proposal %(acronym)s (%(academic_year)s) successfully consolidated."
+msgstr "Proposition %(acronym)s (%(academic_year)s) consolidée avec succès."
+
+msgid "Proposal %(acronym)s (%(academic_year)s) cannot be canceled."
+msgstr "Proposition %(acronym)s (%(academic_year)s) ne peut pas être annulée."
+
+msgid "Proposal %(acronym)s (%(academic_year)s) successfully canceled."
+msgstr "Proposition %(acronym)s (%(academic_year)s) annulée avec succès"
+
+msgid "A report has been sent."
+msgstr "Un rapport a été envoyé."
+
+msgid "Success"
+msgstr "Succès"
+
+msgid "Failure"
+msgstr "Echec"
+
+msgid "Remarks"
+msgstr "Remarques"
+
+msgid "Learning unit"
+msgstr "Unité d'enseignement"
+
+msgid "Research criteria"
+msgstr "Critères de recherche"
+
+msgid "The learning unit %(acronym)s is included in the following education groups"
+msgstr "L'unité d'enseignement %(acronym)s est incluse dans les groupements suivants"
+
+msgid "type_code_formation"
+msgstr "Type d'OF"
+
+msgid "absolute_and_relative_credits"
+msgstr "Crédits<br>relatifs / absolus"
+
+msgid "Proposal is neither accepted nor refused."
+msgstr "La proposition n'est ni acceptée ni refusée."
+
+msgid "learning_achievements"
+msgstr "Acquis d'apprentissage"
+
+msgid "up"
+msgstr "Remonter"
+
+msgid "down"
+msgstr "Descendre"
+
+msgid "learning_achievements_headline"
+msgstr "A la fin de cette unité d'enseignement, l'étudiant est capable de:"
+
+msgid "User %(person)s do not have rights on this proposal."
+msgstr "L'utilisateur %(person)s ne dispose pas de droits sur cette proposition."
+
+msgid "Enrollments to learning unit"
+msgstr "Inscriptions à l'UE"
+
+msgid "Training"
+msgstr "Formation"
+
+msgid "Enrollments to training"
+msgstr "Inscrits à la formation"
+
+msgid "Enrolled to learning unit"
+msgstr "Inscrits à l'UE"
+
+msgid "No proposals was selected."
+msgstr "Aucune propositions n'a été sélectionnées."
+
+msgid "Proposal %(acronym)s (%(academic_year)s) successfully changed state."
+msgstr "Proposition %(acronym)s (%(academic_year)s) a changé d'état avec succès."
+
+msgid "Proposal %(acronym)s (%(academic_year)s) cannot be changed state."
+msgstr "Proposition %(acronym)s (%(academic_year)s) ne peut pas changer d'état."
+
+msgid "cancellation"
+msgstr "annulation"
+
+msgid "consolidation"
+msgstr ""

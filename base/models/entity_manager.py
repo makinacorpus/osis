@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 from django.db import models
 from django.db.models import Prefetch
 
+from base.models import entity_version
 from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
 
 
@@ -33,7 +34,7 @@ class EntityManagerAdmin(SerializableModelAdmin):
     list_display = ('person', 'structure', 'entity')
     fieldsets = ((None, {'fields': ('person', 'structure', 'entity')}),)
     search_fields = ['person__first_name', 'person__last_name', 'structure__acronym']
-    raw_id_fields = ('person', 'structure')
+    raw_id_fields = ('person', 'structure', 'entity')
 
 
 class EntityManager(SerializableModel):
@@ -63,3 +64,13 @@ def find_by_user(a_user, with_entity_version=True):
 def is_entity_manager(user):
     return EntityManager.objects.filter(person__user=user).count() > 0
 
+
+def find_entities_with_descendants_from_entity_managers(entities_manager):
+    entities_with_descendants = []
+    entities_by_id = entity_version.build_current_entity_version_structure_in_memory()
+    for entity_manager in entities_manager:
+        entities_with_descendants.append(entity_manager.entity)
+        entities_with_descendants += [
+            ent_version.entity for ent_version in entities_by_id[entity_manager.entity_id].get('all_children')
+        ]
+    return entities_with_descendants

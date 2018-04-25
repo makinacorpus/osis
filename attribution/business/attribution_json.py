@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ def _split_attribution_by_learning_unit_year(attribution):
 
             attribution_splitted.setdefault(lunit_year.id, {
                     'acronym': lunit_year.acronym,
-                    'title': lunit_year.title,
+                    'title': lunit_year.complete_title,
                     'start_year': attribution.start_year,
                     'end_year': attribution.end_year,
                     'function': attribution.function,

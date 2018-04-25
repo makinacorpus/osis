@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,10 +24,11 @@
 #
 ##############################################################################
 from django import forms
+
+from base.forms.common import set_trans_txt
 from cms.models import translated_text
 from cms.enums import entity_name
 from ckeditor.widgets import CKEditorWidget
-from django.utils.safestring import mark_safe
 
 
 class LearningUnitSpecificationsForm(forms.Form):
@@ -46,10 +47,7 @@ class LearningUnitSpecificationsForm(forms.Form):
                                             language=language_iso)\
                                     .exclude(text__isnull=True)
 
-        for trans_txt in texts_list:
-            text_label = trans_txt.text_label.label
-            text = trans_txt.text if trans_txt.text else ""
-            setattr(self, text_label, mark_safe(text))
+        set_trans_txt(self, texts_list)
 
 
 class LearningUnitSpecificationsEditForm(forms.Form):

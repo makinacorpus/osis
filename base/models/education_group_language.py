@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,9 +26,10 @@
 from django.db import models
 from django.contrib import admin
 from base.models.enums import education_group_language
+from base.models.osis_model_admin import OsisModelAdmin
 
 
-class EducationGroupLanguageAdmin(admin.ModelAdmin):
+class EducationGroupLanguageAdmin(OsisModelAdmin):
     list_display = ('type', 'order', 'education_group_year', 'language')
     raw_id_fields = ('education_group_year', 'language')
 

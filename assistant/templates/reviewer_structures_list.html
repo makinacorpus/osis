@@ -9,7 +9,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -59,34 +59,24 @@
             </tr>
             </thead>
             <tbody>
-            {% for entity_version in object_list %}
+            {% for entity in object_list %}
                 <tr>
-                <td>{{ entity_version.title }}</td>
-                <td>{{ entity_version.acronym }}</td>
+                <td>{{ entity.title }}</td>
+                <td>{{ entity.acronym }}</td>
                 <td align="center">
-                {% for rev in entity_version.entity.reviewer_set.all %}
-                    {% if "ASSISTANT" in rev.role %}
-                        {{ rev.person }}
-                    {% elif entity_version.entity.reviewer_set.all|length < 2 %}
+                {% if entity.has_already_delegate %}
+                    {{ entity.has_already_delegate.person }}
+                {% else %}
                     <form id=entity_version.entity.id method="POST" action="{% url 'reviewer_delegation_add' %}">
                     {{ form.non_field_errors }}
  		            {% csrf_token %}
-                    <input type="hidden" name="entity_id" value="{{ entity_version.entity.id }}">
+                    <input type="hidden" name="entity" value="{{ entity.id }}">
                     <button type="submit" class="btn btn-link" title="{% trans 'edit'%}">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> {% trans 'add'%}
                     </button></form>
-                    {% endif %}
-                {% empty %}
-                    <form id=entity.id method="POST" action="{% url 'reviewer_delegation_add' %}">
-                    {{ form.non_field_errors }}
- 		            {% csrf_token %}
-                    <input type="hidden" name="entity_id" value="{{ entity_version.entity.id }}">
-                    <button type="submit" class="btn btn-link" title="{% trans 'edit'%}">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> {% trans 'add'%}
-                    </button></form>
-                    </td>
-                    </tr>
-                {% endfor %}
+                {% endif %}
+                </td>
+                </tr>
             {% endfor %}
             </tbody>
             </table>

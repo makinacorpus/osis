@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from unittest import mock
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -62,7 +61,7 @@ class PersonEntityTest(TestCase):
         PersonEntityFactory(person=person, entity=self.root_entity, with_child=False)
         entities = person_entity.find_entities_by_person(person)
         self.assertIsInstance(entities, list)
-        self.assertEqual(len(entities), 1) # We take only root, no child
+        self.assertEqual(len(entities), 1)  # We take only root, no child
 
     def test_find_entities_by_person_with_child_true(self):
         person = PersonFactory()

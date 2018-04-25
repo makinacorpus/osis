@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ from dissertation.models import dissertation_role
 
 class AdviserAdmin(SerializableModelAdmin):
     list_display = ('person', 'type')
-    raw_id_fields = ('person', )
+    raw_id_fields = ('person',)
     search_fields = ('uuid', 'person__last_name', 'person__first_name')
 
 
@@ -69,7 +69,7 @@ class Adviser(SerializableModel):
         # list_stat[0]= count dissertation_role active of adviser
         # list_stat[1]= count dissertation_role Promoteur active of adviser
         # list_stat[2]= count dissertation_role coPromoteur active of adviser
-        # list_stat[3]= count dissertation_role coPromoteur active of adviser
+        # list_stat[3]= count dissertation_role reader active of adviser
         # list_stat[4]= count dissertation_role need request active of adviser
         list_stat[0] = 0
         list_stat[1] = 0
@@ -78,45 +78,45 @@ class Adviser(SerializableModel):
         list_stat[4] = 0
 
         queryset = dissertation_role.DissertationRole.objects.all().filter(Q(adviser=self))
-        list_stat[0] = queryset.filter(dissertation__active=True)\
-                               .count()
+        list_stat[0] = queryset.filter(dissertation__active=True) \
+            .count()
 
-        list_stat[1] = queryset.filter(status='PROMOTEUR')\
-                               .filter(Q(dissertation__active=True)) \
-                               .exclude(Q(dissertation__status='DRAFT') |
-                                        Q(dissertation__status='ENDED') |
-                                        Q(dissertation__status='DEFENDED'))\
-                               .count()
+        list_stat[1] = queryset.filter(status='PROMOTEUR') \
+            .filter(Q(dissertation__active=True)) \
+            .exclude(Q(dissertation__status='DRAFT') |
+                     Q(dissertation__status='ENDED') |
+                     Q(dissertation__status='DEFENDED')) \
+            .count()
 
-        list_stat[4] = queryset.filter(status='PROMOTEUR')\
-                               .filter(dissertation__status='DIR_SUBMIT')\
-                               .filter(dissertation__active=True)\
-                               .count()
+        list_stat[4] = queryset.filter(status='PROMOTEUR') \
+            .filter(dissertation__status='DIR_SUBMIT') \
+            .filter(dissertation__active=True) \
+            .count()
 
-        advisers_copro = queryset.filter(status='CO_PROMOTEUR')\
-                                 .filter(dissertation__active=True) \
-                                 .exclude(Q(dissertation__status='DRAFT') |
-                                          Q(dissertation__status='ENDED') |
-                                          Q(dissertation__status='DEFENDED'))
+        advisers_copro = queryset.filter(status='CO_PROMOTEUR') \
+            .filter(dissertation__active=True) \
+            .exclude(Q(dissertation__status='DRAFT') |
+                     Q(dissertation__status='ENDED') |
+                     Q(dissertation__status='DEFENDED'))
 
         list_stat[2] = advisers_copro.count()
         tab_offer_count_copro = dissertation_role.get_tab_count_role_by_offer(advisers_copro)
 
         advisers_reader = queryset.filter(Q(adviser=self) &
                                           Q(status='READER') &
-                                          Q(dissertation__active=True))\
-                                  .exclude(Q(dissertation__status='DRAFT') |
-                                           Q(dissertation__status='ENDED') |
-                                           Q(dissertation__status='DEFENDED'))
+                                          Q(dissertation__active=True)) \
+            .exclude(Q(dissertation__status='DRAFT') |
+                     Q(dissertation__status='ENDED') |
+                     Q(dissertation__status='DEFENDED'))
 
         list_stat[3] = advisers_reader.count()
         tab_offer_count_read = dissertation_role.get_tab_count_role_by_offer(advisers_reader)
 
-        advisers_pro = queryset.filter(status='PROMOTEUR')\
-                               .filter(Q(dissertation__active=True)) \
-                               .exclude(Q(dissertation__status='DRAFT') |
-                                        Q(dissertation__status='ENDED') |
-                                        Q(dissertation__status='DEFENDED'))
+        advisers_pro = queryset.filter(status='PROMOTEUR') \
+            .filter(Q(dissertation__active=True)) \
+            .exclude(Q(dissertation__status='DRAFT') |
+                     Q(dissertation__status='ENDED') |
+                     Q(dissertation__status='DEFENDED'))
 
         tab_offer_count_pro = dissertation_role.get_tab_count_role_by_offer(advisers_pro)
 
@@ -143,17 +143,21 @@ def search_adviser(terms):
     queryset = Adviser.objects.all().filter(type='PRF')
     if terms:
         queryset = queryset.filter(
-                                    (
-                                        Q(person__first_name__icontains=terms) |
-                                        Q(person__last_name__icontains=terms)
-                                    ) &
-                                    Q(type='PRF')).distinct()
+            (
+                Q(person__first_name__icontains=terms) |
+                Q(person__last_name__icontains=terms)
+            ) &
+            Q(type='PRF')).distinct()
     return queryset
 
 
 def list_teachers():
-    return Adviser.objects.filter(type='PRF')\
-                          .order_by('person__last_name', 'person__first_name')
+    return Adviser.objects.filter(type='PRF') \
+        .order_by('person__last_name', 'person__first_name')
+
+
+def find_all_advisers():
+    return Adviser.objects.all()
 
 
 def add(person, type_arg, available_by_email, available_by_phone, available_at_office, comment):
@@ -186,3 +190,30 @@ def get_by_id(adviser_id):
         return Adviser.objects.get(pk=adviser_id)
     except ObjectDoesNotExist:
         return None
+
+
+def find_advisers_last_name_email(term, maximum_in_request):
+    if term is None:
+        return []
+    else:
+        return Adviser.objects.filter(Q(person__email__icontains=term) |
+                                      Q(person__last_name__icontains=term))[:maximum_in_request]
+
+
+def convert_advisers_to_array(advisers):
+    return_data = [
+        {
+            'value': "{}, {} ({})".format(none_to_str(adviser.person.last_name),
+                                          none_to_str(adviser.person.first_name),
+                                          none_to_str(adviser.person.email)),
+            'first_name': none_to_str(adviser.person.first_name),
+            'last_name': none_to_str(adviser.person.last_name),
+            'id': adviser.id
+        }
+        for adviser in advisers
+        ]
+    return return_data
+
+
+def none_to_str(value):
+    return value or ''

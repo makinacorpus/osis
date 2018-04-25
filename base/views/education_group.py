@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,29 +23,29 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from collections import OrderedDict
+
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.decorators import login_required, permission_required
 
 from base import models as mdl
-from base.business.education_group import can_user_edit_administrative_data
+from base.business import education_group as education_group_business
+from base.business.education_group import assert_category_of_education_group_year
+from base.forms.education_group_general_informations import EducationGroupGeneralInformationsForm
 from base.forms.education_groups import EducationGroupFilter, MAX_RECORDS
 from base.forms.education_groups_administrative_data import CourseEnrollmentForm, AdministrativeDataFormset
 from base.models.education_group_year import EducationGroupYear
-from base.models.enums import education_group_categories
-from base.models.program_manager import is_program_manager
-
-from . import layout
-from cms.enums import entity_name
-from cms import models as mdl_cms
-from collections import OrderedDict
-from django.conf import settings
-from base.forms.education_group_general_informations import EducationGroupGeneralInformationsForm
 from base.models.enums import academic_calendar_type
+from base.models.enums import education_group_categories
+from cms import models as mdl_cms
+from cms.enums import entity_name
+from . import layout
 
 CODE_SCS = 'code_scs'
 TITLE = 'title'
@@ -57,7 +57,7 @@ NUMBER_SESSIONS = 3
 
 
 @login_required
-@permission_required('base.can_access_offer', raise_exception=True)
+@permission_required('base.can_access_education_group', raise_exception=True)
 def education_groups(request):
     if request.GET:
         form = EducationGroupFilter(request.GET)
@@ -90,62 +90,43 @@ def _check_if_display_message(request, an_education_groups):
 
 
 @login_required
-@permission_required('base.can_access_offer', raise_exception=True)
+@permission_required('base.can_access_education_group', raise_exception=True)
 def education_group_read(request, education_group_year_id):
     root = request.GET.get('root')
-    education_group_year = mdl.education_group_year.find_by_id(education_group_year_id)
+    education_group_year = get_object_or_404(EducationGroupYear, id=education_group_year_id)
     education_group_languages = [education_group_language.language.name for education_group_language in
                                  mdl.education_group_language.find_by_education_group_year(education_group_year)]
     enums = mdl.enums.education_group_categories
-    if root:
-        parent = mdl.education_group_year.find_by_id(root)
-    else:
-        parent = education_group_year
+    parent = _get_education_group_root(root, education_group_year)
+
     return layout.render(request, "education_group/tab_identification.html", locals())
 
 
 @login_required
-@permission_required('base.can_access_offer', raise_exception=True)
-def education_group_parent_read(request, education_group_year_id):
-    root = request.GET.get('root')
-    education_group_year = mdl.education_group_year.find_by_id(education_group_year_id)
-    education_group_languages = [education_group_language.language.name for education_group_language in
-                                 mdl.education_group_language.find_by_education_group_year(education_group_year)]
-    enums = mdl.enums.education_group_categories
-    if root:
-        parent = mdl.education_group_year.find_by_id(root)
-    else:
-        parent = education_group_year
-    return layout.render(request, "education_group/tab_identification.html", locals())
-
-
-@login_required
-@permission_required('base.can_access_offer', raise_exception=True)
+@permission_required('base.can_access_education_group', raise_exception=True)
 def education_group_diplomas(request, education_group_year_id):
-    return _education_group_diplomas_tab(request, education_group_year_id)
-
-
-def _education_group_diplomas_tab(request, education_group_year_id):
-    education_group_year = mdl.education_group_year.find_by_id(education_group_year_id)
-    parent = get_root(education_group_year_id, request)
+    education_group_year = get_object_or_404(EducationGroupYear, id=education_group_year_id)
+    assert_category_of_education_group_year(education_group_year, (education_group_categories.TRAINING,))
+    education_group_year_root_id = request.GET.get('root')
+    parent = _get_education_group_root(education_group_year_root_id, education_group_year)
     return layout.render(request, "education_group/tab_diplomas.html", locals())
 
 
 @login_required
-@permission_required('base.can_access_offer', raise_exception=True)
+@permission_required('base.can_access_education_group', raise_exception=True)
 def education_group_general_informations(request, education_group_year_id):
-    return _education_group_general_informations_tab(request, education_group_year_id)
+    education_group_year = get_object_or_404(EducationGroupYear, id=education_group_year_id)
+    assert_category_of_education_group_year(
+        education_group_year, (education_group_categories.TRAINING, education_group_categories.MINI_TRAINING))
 
-
-def _education_group_general_informations_tab(request, education_group_year_id):
-    education_group_year = mdl.education_group_year.find_by_id(education_group_year_id)
-
-    CMS_LABEL = mdl_cms.translated_text.find_by_entity_reference(entity_name.OFFER_YEAR, education_group_year_id)
+    CMS_LABEL = mdl_cms.translated_text.find_labels_list_by_label_entity_and_reference(entity_name.OFFER_YEAR,
+                                                                                       education_group_year_id)
 
     fr_language = next((lang for lang in settings.LANGUAGES if lang[0] == 'fr-be'), None)
     en_language = next((lang for lang in settings.LANGUAGES if lang[0] == 'en'), None)
 
-    parent = get_root(education_group_year_id, request)
+    education_group_year_root_id = request.GET.get('root')
+    parent = _get_education_group_root(education_group_year_root_id, education_group_year)
 
     context = {'parent': parent,
                'education_group_year': education_group_year,
@@ -170,19 +151,18 @@ def _get_cms_label_data(cms_label, user_language):
 
 
 @login_required
-@permission_required('base.can_access_offer', raise_exception=True)
+@permission_required('base.can_access_education_group', raise_exception=True)
 def education_group_administrative_data(request, education_group_year_id):
-    return _education_group_administrative_data_tab(request, education_group_year_id)
+    education_group_year = get_object_or_404(EducationGroupYear, pk=education_group_year_id)
 
+    assert_category_of_education_group_year(education_group_year, (education_group_categories.TRAINING,))
 
-def _education_group_administrative_data_tab(request, education_group_year_id):
-    education_group_year = mdl.education_group_year.find_by_id(education_group_year_id)
-
-    parent = get_root(education_group_year_id, request)
+    education_group_year_root_id = request.GET.get('root')
+    parent = _get_education_group_root(education_group_year_root_id, education_group_year)
 
     context = {'parent': parent,
                'education_group_year': education_group_year,
-               'course_enrollment':get_dates(academic_calendar_type.COURSE_ENROLLMENT, education_group_year),
+               'course_enrollment': get_dates(academic_calendar_type.COURSE_ENROLLMENT, education_group_year),
                'mandataries': mdl.mandatary.find_by_education_group_year(education_group_year),
                'pgm_mgrs': mdl.program_manager.find_by_education_group(education_group_year.education_group)}
     context.update({'exam_enrollments': get_sessions_dates(academic_calendar_type.EXAM_ENROLLMENTS,
@@ -195,8 +175,8 @@ def _education_group_administrative_data_tab(request, education_group_year_id):
                                                        education_group_year)})
     context.update({'scores_exam_diffusion': get_sessions_dates(academic_calendar_type.SCORES_EXAM_DIFFUSION,
                                                                 education_group_year)})
-    context.update({"can_edit_administrative_data":
-                        can_user_edit_administrative_data(request.user, education_group_year.education_group)})
+    context.update({"can_edit_administrative_data":  education_group_business.can_user_edit_administrative_data(
+                                                                                request.user, education_group_year)})
     return layout.render(request, "education_group/tab_administrative_data.html", context)
 
 
@@ -204,8 +184,12 @@ def _education_group_administrative_data_tab(request, education_group_year_id):
 @permission_required('base.can_edit_education_group_administrative_data', raise_exception=True)
 def education_group_edit_administrative_data(request, education_group_year_id):
     education_group_year = get_object_or_404(EducationGroupYear, pk=education_group_year_id)
-    if not is_program_manager(request.user, education_group=education_group_year.education_group):
-        raise PermissionDenied("Only program managers of the education group can edit.")
+
+    assert_category_of_education_group_year(education_group_year, (education_group_categories.TRAINING,))
+
+    if not education_group_business.can_user_edit_administrative_data(request.user, education_group_year):
+        raise PermissionDenied("Only program managers of the education group OR central manager "
+                               "linked to entity can edit.")
 
     formset_session = AdministrativeDataFormset(request.POST or None,
                                                 form_kwargs={'education_group_year': education_group_year})
@@ -227,15 +211,6 @@ def education_group_edit_administrative_data(request, education_group_year_id):
     return layout.render(request, "education_group/tab_edit_administrative_data.html", locals())
 
 
-def get_root(education_group_year_id, request):
-    root = request.GET.get('root')
-    if root:
-        parent = mdl.education_group_year.find_by_id(root)
-    else:
-        parent = education_group_year_id
-    return parent
-
-
 def get_sessions_dates(an_academic_calendar_type, an_education_group_year):
     date_dict = {}
 
@@ -246,8 +221,7 @@ def get_sessions_dates(an_academic_calendar_type, an_education_group_year):
         if session:
             dates = mdl.offer_year_calendar.get_by_education_group_year_and_academic_calendar(session.academic_calendar,
                                                                                               an_education_group_year)
-            key = 'session{}'.format(session_number+1)
-            date_dict.update({key: dates})
+            date_dict['session{}'.format(session_number+1)] = dates
 
     return date_dict
 
@@ -263,19 +237,26 @@ def get_dates(an_academic_calendar_type, an_education_group_year):
 
 
 @login_required
-@permission_required('base.can_access_offer', raise_exception=True)
+@permission_required('base.can_access_education_group', raise_exception=True)
 def education_group_content(request, education_group_year_id):
     return _education_group_content_tab(request, education_group_year_id)
 
 
 def _education_group_content_tab(request, education_group_year_id):
     education_group_year = mdl.education_group_year.find_by_id(education_group_year_id)
-    parent = get_root(education_group_year_id, request)
+    education_group_year_root_id = request.GET.get('root')
+    parent = _get_education_group_root(education_group_year_root_id, education_group_year)
+
     context = {'parent': parent,
                'education_group_year': education_group_year,
                'group_elements': _group_elements(education_group_year),
                }
     return layout.render(request, "education_group/tab_content.html", context)
+
+
+def _get_education_group_root(education_group_year_root_id, default_education_group_year_root):
+    return get_object_or_404(mdl.education_group_year.EducationGroupYear, id=education_group_year_root_id) \
+        if education_group_year_root_id else default_education_group_year_root
 
 
 def _group_elements(education_group_yr):
@@ -300,9 +281,9 @@ def _get_group_elements_data(group_elements):
 
 def _sorting(group_elements_data):
     return sorted(group_elements_data,
-                  key= lambda k: (k.get('group_element').current_order is None,
-                                  k.get('group_element').current_order == -1,
-                                  k.get('group_element').current_order))
+                  key=lambda k: (k.get('group_element').current_order is None,
+                                 k.get('group_element').current_order == -1,
+                                 k.get('group_element').current_order))
 
 
 def _get_education_group_detail(dict_param, group_element):

@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -29,34 +29,10 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label>{% trans 'acronym' %}</label><br>
-                        {% if education_group_year.acronym %}
-                            {{ education_group_year.acronym }}
-                        {% elif parent.acronym %}
-                            <strong class="text-primary">{{ parent.acronym }}</strong>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label>{% trans 'code' %}</label><br>
-                        {% if education_group_year.partial_acronym %}
-                            {{ education_group_year.partial_acronym }}
-                        {% elif parent.partial_acronym %}
-                            <strong class="text-primary">{{ parent.partial_acronym }}</strong>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-body">
                 <label>{% trans 'title_in_french' %}</label><br>
-                <strong class="text-primary">{{ parent.title | default_if_none:'' }}</strong>
                 {{ education_group_year.title | default_if_none:'-' }}
                 <br><br>
                 <label>{% trans 'title_in_english'%}</label><br>
-                <strong class="text-primary">{{ parent.title_english | default_if_none:'' }}</strong>
                 {{ education_group_year.title_english | default_if_none:'' }}
                 <br><br>
                 <label>{% trans 'keywords'%}</label><br>
@@ -120,6 +96,36 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-body">
+                <label>{% trans 'acronym' %}</label><br>
+                {% if education_group_year.acronym %}
+                    {{ education_group_year.acronym }}
+                {% elif parent.acronym %}
+                    <strong class="text-primary">{{ parent.acronym }}</strong>
+                {% endif %}
+                <br><br>
+                <label>{% trans 'code'%}</label><br>
+                {% if education_group_year.partial_acronym %}
+                    {{ education_group_year.partial_acronym }}
+                {% elif parent.partial_acronym %}
+                    <strong class="text-primary">{{ parent.partial_acronym }}</strong>
+                {% endif %}
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>{% trans 'schedule_type' %}</label><br>
+                        {% if education_group_year.schedule_type %}
+                            {% trans education_group_year.schedule_type %}
+                        {% elif parent.schedule_type %}
+                            <strong class="text-primary">
+                            {% trans parent.schedule_type %}
+                            </strong>
+                        {% endif %}
+                    </div>
+                </div>
+                <br>
                 <div class="row">
                     <div class="col-md-6">
                         <label>{% trans 'administration_entity' %}</label><br>

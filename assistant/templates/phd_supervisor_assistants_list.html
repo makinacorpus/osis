@@ -9,7 +9,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -36,10 +36,10 @@
 <div class="page-header">
     {% if current_reviewer %}
         <h6>{% trans 'connected_as' %} {{ current_reviewer.person }} ({% trans current_reviewer.role %}) -
-            {{ entity.acronym }}</h6>
+            {{ current_reviewer.entity.most_recent_acronym }}</h6>
     {% endif %}
     <h3>{% trans 'assistant_mandates_renewals' %} {{ year|add:1 }}</h3>
-    {% if is_reviewer %}
+    {% if current_reviewer %}
         <ul class="nav nav-tabs">
             <li><a href="{% url 'reviewer_mandates_list' %}">{% trans 'reviewer_mandates_list' %}</a></li>
             <li><a href="{% url 'reviewer_mandates_list_todo' %}">{% trans 'reviewer_todo' %}</a></li>

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,16 +29,11 @@ from unittest import mock
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
-from base.models.academic_calendar import AcademicCalendar
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.offer_year import OfferYearFactory
 from base.tests.factories.offer_year_calendar import OfferYearCalendarFactory
 from base.tests.factories.program_manager import ProgramManagerFactory
-
-
-def save(self, *args, **kwargs):
-    return super(AcademicCalendar, self).save()
 
 
 class OfferViewTestCase(TestCase):
@@ -115,7 +110,6 @@ class OfferViewTestCase(TestCase):
                                             year=today.year)
         offer_year = OfferYearFactory(academic_year=academic_year)
 
-        AcademicCalendar.save = save
         academic_calendar = AcademicCalendarFactory(academic_year=academic_year)
 
         offer_year_calendar = OfferYearCalendarFactory(offer_year=offer_year,

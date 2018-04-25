@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,104 +23,56 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from base.models import proposal_learning_unit, campus, entity, person_entity
-from base.models.academic_year import current_academic_year
-from base.models import entity_container_year
-from base.models.proposal_learning_unit import find_by_folder
-from base.models.utils.person_entity_filter import filter_by_attached_entities
-from base.models.enums import entity_container_year_link_type, proposal_type, learning_unit_year_subtypes, \
-    learning_container_year_types, proposal_state
+import functools
+from django.contrib.messages import ERROR, SUCCESS
+from django.contrib.messages import INFO
+from django.db import IntegrityError
+from django.forms import model_to_dict
+from django.utils.translation import ugettext_lazy as _
+
+from base import models as mdl_base
+from base.business.learning_units.edition import update_or_create_entity_container_year_with_components, \
+    edit_learning_unit_end_date, update_learning_unit_year_with_report
+from base.business.learning_units import perms
+from base.business.learning_units.simple import deletion as business_deletion
+from base.models import entity_container_year, campus, entity
+from base.models.academic_year import find_academic_year_by_year
+from base.models.entity_container_year import find_entities_grouped_by_linktype
+from base.models.enums import proposal_state, proposal_type
+from base.models.enums.entity_container_year_link_type import ENTITY_TYPE_LIST
+from base.models.enums.proposal_type import ProposalType
+from base.utils import send_mail as send_mail_util
 from reference.models import language
 
-
-def compute_form_initial_data(learning_unit_year):
-    entities_version = entity_container_year.find_last_entity_version_grouped_by_linktypes(
-        learning_unit_year.learning_container_year)
-    initial_data = {
-        "academic_year": learning_unit_year.academic_year.id,
-        "first_letter": learning_unit_year.acronym[0],
-        "acronym": learning_unit_year.acronym[1:],
-        "title": learning_unit_year.title,
-        "title_english": learning_unit_year.title_english,
-        "container_type": learning_unit_year.learning_container_year.container_type,
-        "subtype": learning_unit_year.subtype,
-        "internship_subtype": learning_unit_year.internship_subtype,
-        "credits": learning_unit_year.credits,
-        "periodicity": learning_unit_year.learning_unit.periodicity,
-        "status": learning_unit_year.status,
-        "language": learning_unit_year.learning_container_year.language,
-        "quadrimester": learning_unit_year.quadrimester,
-        "campus": learning_unit_year.learning_container_year.campus,
-        "requirement_entity": entities_version.get(entity_container_year_link_type.REQUIREMENT_ENTITY),
-        "allocation_entity": entities_version.get(entity_container_year_link_type.ALLOCATION_ENTITY),
-        "additional_entity_1": entities_version.get(entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_1),
-        "additional_entity_2": entities_version.get(entity_container_year_link_type.ADDITIONAL_REQUIREMENT_ENTITY_2)
-    }
-    return {key: value for key, value in initial_data.items() if value is not None}
+APP_BASE_LABEL = 'base'
+END_FOREIGN_KEY_NAME = "_id"
+NO_PREVIOUS_VALUE = '-'
+# TODO : VALUES_WHICH_NEED_TRANSLATION ?
+VALUES_WHICH_NEED_TRANSLATION = ["periodicity", "container_type", "internship_subtype"]
+LABEL_ACTIVE = _('active')
+LABEL_INACTIVE = _('inactive')
+INITIAL_DATA_FIELDS = {'learning_container_year': ["id", "acronym", "common_title", "common_title_english",
+                                                   "container_type", "campus", "language", "in_charge"],
+                       'learning_unit': ["id", "periodicity", "end_year"],
+                       'learning_unit_year': ["id", "acronym", "specific_title", "specific_title_english",
+                                              "internship_subtype", "status", "credits"]
+                       }
 
 
-def compute_proposal_type(initial_data, current_data):
-    data_changed = _compute_data_changed(initial_data, current_data)
-    filtered_data_changed = filter(lambda key: key not in ["academic_year", "subtype", "acronym"], data_changed)
-    transformation = current_data["acronym"] != "{}{}".format(initial_data["first_letter"], initial_data["acronym"])
-    modification = any(map(lambda x: x != "acronym", filtered_data_changed))
-    if transformation and modification:
-        return proposal_type.ProposalType.TRANSFORMATION_AND_MODIFICATION.name
-    elif transformation:
-        return proposal_type.ProposalType.TRANSFORMATION.name
-    return proposal_type.ProposalType.MODIFICATION.name
+def compute_proposal_type(proposal_learning_unit_year):
+    if proposal_learning_unit_year.type in [ProposalType.CREATION.name, ProposalType.SUPPRESSION.name]:
+        return proposal_learning_unit_year.type
+    differences = get_difference_of_proposal(proposal_learning_unit_year)
+    if differences.get('acronym') and len(differences) == 1:
+        return ProposalType.TRANSFORMATION.name
+    elif differences.get('acronym'):
+        return ProposalType.TRANSFORMATION_AND_MODIFICATION.name
+    else:
+        return ProposalType.MODIFICATION.name
 
 
-def _compute_data_changed(initial_data, current_data):
-    data_changed = []
-    for key, value in initial_data.items():
-        current_value = current_data.get(key)
-        if str(value) != str(current_value):
-            data_changed.append(key)
-    return data_changed
-
-
-def is_eligible_for_modification_proposal(learning_unit_year, a_person):
-    proposal = proposal_learning_unit.find_by_learning_unit_year(learning_unit_year)
-    current_year = current_academic_year().year
-
-    if learning_unit_year.academic_year.year < current_year or \
-            learning_unit_year.subtype == learning_unit_year_subtypes.PARTIM:
-        return False
-    if learning_unit_year.learning_container_year.container_type not in (learning_container_year_types.COURSE,
-                                                                         learning_container_year_types.DISSERTATION,
-                                                                         learning_container_year_types.INTERNSHIP):
-        return False
-    if proposal:
-        return False
-    return _is_person_linked_to_entity_in_charge_of_learning_unit(learning_unit_year, a_person)
-
-
-def is_eligible_for_cancel_of_proposal(learning_unit_proposal, a_person):
-    if learning_unit_proposal.state != proposal_state.ProposalState.FACULTY.name:
-        return False
-    valid_type = [proposal_type.ProposalType.MODIFICATION.name, proposal_type.ProposalType.TRANSFORMATION.name,
-                  proposal_type.ProposalType.TRANSFORMATION_AND_MODIFICATION.name]
-    if learning_unit_proposal.type not in valid_type:
-        return False
-
-    initial_entity_requirement_id = \
-        learning_unit_proposal.initial_data["entities"][entity_container_year_link_type.REQUIREMENT_ENTITY]
-    an_entity = entity.get_by_internal_id(initial_entity_requirement_id)
-    if an_entity in person_entity.find_entities_by_person(a_person):
-        return True
-    return _is_person_linked_to_entity_in_charge_of_learning_unit(learning_unit_proposal.learning_unit_year, a_person)
-
-
-def _is_person_linked_to_entity_in_charge_of_learning_unit(a_learning_unit_year, a_person):
-    entity_containers_year = entity_container_year.search(
-        learning_container_year=a_learning_unit_year.learning_container_year,
-        link_type=entity_container_year_link_type.REQUIREMENT_ENTITY)
-
-    return filter_by_attached_entities(a_person, entity_containers_year).exists()
-
-
-def reinitialize_data_before_proposal(learning_unit_proposal, learning_unit_year):
+def reinitialize_data_before_proposal(learning_unit_proposal):
+    learning_unit_year = learning_unit_proposal.learning_unit_year
     initial_data = learning_unit_proposal.initial_data
     _reinitialize_model_before_proposal(learning_unit_year, initial_data["learning_unit_year"])
     _reinitialize_model_before_proposal(learning_unit_year.learning_unit, initial_data["learning_unit"])
@@ -151,9 +103,7 @@ def _reinitialize_entities_before_proposal(learning_container_year, initial_enti
     for type_entity, id_entity in initial_entities_by_type.items():
         initial_entity = entity.get_by_internal_id(id_entity)
         if initial_entity:
-            entity_container_year.EntityContainerYear.objects.update_or_create(
-                learning_container_year=learning_container_year,
-                type=type_entity, defaults={"entity": initial_entity})
+            update_or_create_entity_container_year_with_components(initial_entity, learning_container_year, type_entity)
         else:
             current_entity_container_year = entity_container_year.find_by_learning_container_year_and_linktype(
                 learning_container_year, type_entity)
@@ -162,7 +112,290 @@ def _reinitialize_entities_before_proposal(learning_container_year, initial_enti
 
 
 def delete_learning_unit_proposal(learning_unit_proposal):
-    proposal_folder = learning_unit_proposal.folder
+    prop_type = learning_unit_proposal.type
+    lu = learning_unit_proposal.learning_unit_year.learning_unit
     learning_unit_proposal.delete()
-    if not find_by_folder(proposal_folder).exists():
-        proposal_folder.delete()
+    if prop_type == ProposalType.CREATION.name:
+        lu.delete()
+
+
+def get_difference_of_proposal(learning_unit_yr_proposal):
+    initial_data = learning_unit_yr_proposal.initial_data
+    actual_data = copy_learning_unit_data(learning_unit_yr_proposal.learning_unit_year)
+    differences = {}
+    for model in ['learning_unit', 'learning_unit_year', 'learning_container_year', 'entities']:
+        initial_data_by_model = initial_data.get(model)
+        if not initial_data_by_model:
+            continue
+
+        differences.update(
+            {key: initial_data_by_model[key] for key, value in initial_data_by_model.items()
+             if value != actual_data[model][key]})
+    return differences
+
+
+def _replace_key_of_foreign_key(data):
+    return {key_name.replace(END_FOREIGN_KEY_NAME, ''): data[key_name] for key_name in data.keys()}
+
+
+def _compare_initial_current_data(current_data, initial_data):
+    corrected_dict = _replace_key_of_foreign_key(current_data)
+    differences = {}
+    for attribute, initial_value in initial_data.items():
+        if attribute in corrected_dict and initial_data.get(attribute, None) != corrected_dict.get(attribute):
+            differences.update(_get_the_old_value(attribute, current_data, initial_data))
+    return differences
+
+
+def _get_the_old_value(key, current_data, initial_data):
+    initial_value = initial_data.get(key) or NO_PREVIOUS_VALUE
+
+    if _is_foreign_key(key, current_data):
+        return _get_str_representing_old_data_from_foreign_key(key, initial_value)
+    else:
+        return _get_old_value_when_not_foreign_key(initial_value, key)
+
+
+def _get_str_representing_old_data_from_foreign_key(key, initial_value):
+    if initial_value != NO_PREVIOUS_VALUE:
+        return _get_old_value_of_foreign_key(key, initial_value)
+    else:
+        return {key: NO_PREVIOUS_VALUE}
+
+
+def _get_old_value_of_foreign_key(key, initial_value):
+    differences = {}
+    if key == 'campus':
+        differences.update({key: str(mdl_base.campus.find_by_id(initial_value))})
+
+    if key == 'language':
+        differences.update({key: str(language.find_by_id(initial_value))})
+    return differences
+
+
+def _is_foreign_key(key, current_data):
+    return "{}{}".format(key, END_FOREIGN_KEY_NAME) in current_data
+
+
+def _get_status_initial_value(initial_value, key):
+    return {key: LABEL_ACTIVE} if initial_value else {key: LABEL_INACTIVE}
+
+
+def _get_old_value_when_not_foreign_key(initial_value, key):
+    if key in VALUES_WHICH_NEED_TRANSLATION and initial_value != NO_PREVIOUS_VALUE:
+        return {key: "{}".format(_(initial_value))}
+    elif key == 'status':
+        return _get_status_initial_value(initial_value, key)
+    else:
+        return {key: "{}".format(initial_value)}
+
+
+def _get_rid_of_blank_value(data):
+    clean_data = data.copy()
+    for key, value in clean_data.items():
+        if value == '':
+            clean_data[key] = None
+    return clean_data
+
+
+def force_state_of_proposals(proposals, author, new_state):
+    change_state = functools.partial(modify_proposal_state, new_state)
+    return _apply_action_on_proposals_and_send_report(
+        proposals,
+        author,
+        change_state,
+        "Proposal %(acronym)s (%(academic_year)s) successfully changed state.",
+        "Proposal %(acronym)s (%(academic_year)s) cannot be changed state.",
+        None,
+        None,
+        perms.is_eligible_to_edit_proposal
+    )
+
+
+def modify_proposal_state(new_state, proposal):
+    proposal.state = new_state
+    proposal.save()
+    return {}
+
+
+def cancel_proposals_and_send_report(proposals, author, research_criteria):
+    return _apply_action_on_proposals_and_send_report(
+        proposals,
+        author,
+        cancel_proposal,
+        "Proposal %(acronym)s (%(academic_year)s) successfully canceled.",
+        "Proposal %(acronym)s (%(academic_year)s) cannot be canceled.",
+        send_mail_util.send_mail_cancellation_learning_unit_proposals,
+        research_criteria,
+        perms.is_eligible_for_cancel_of_proposal
+    )
+
+
+def consolidate_proposals_and_send_report(proposals, author, research_criteria):
+    return _apply_action_on_proposals_and_send_report(
+        proposals,
+        author,
+        consolidate_proposal,
+        "Proposal %(acronym)s (%(academic_year)s) successfully consolidated.",
+        "Proposal %(acronym)s (%(academic_year)s) cannot be consolidated.",
+        send_mail_util.send_mail_consolidation_learning_unit_proposal,
+        research_criteria,
+        perms.is_eligible_to_consolidate_proposal
+    )
+
+
+def _apply_action_on_proposals_and_send_report(proposals, author, action_method, success_msg_id, error_msg_id,
+                                               send_mail_method, research_criteria, permission_check):
+    messages_by_level = {SUCCESS: [], ERROR: []}
+    proposals_with_results = _apply_action_on_proposals(proposals, action_method, author, permission_check)
+
+    if send_mail_method:
+        send_mail_method(author, proposals_with_results, research_criteria)
+        messages_by_level[INFO] = [_("A report has been sent.")]
+
+    for proposal, results in proposals_with_results:
+        if ERROR in results:
+            messages_by_level[ERROR].append(_(error_msg_id) % {
+                "acronym": proposal.learning_unit_year.acronym,
+                "academic_year": proposal.learning_unit_year.academic_year
+            })
+        else:
+            messages_by_level[SUCCESS].append(_(success_msg_id) % {
+                "acronym": proposal.learning_unit_year.acronym,
+                "academic_year": proposal.learning_unit_year.academic_year
+            })
+    return messages_by_level
+
+
+def _apply_action_on_proposals(proposals, action_method, author, permission_check):
+    proposals_with_results = []
+    for proposal in proposals:
+        proposal_with_result = (proposal, {ERROR: ["User %(person)s do not have rights on this proposal." % {
+            "person": str(author)
+        }]})
+        if permission_check(proposal, author):
+            proposal_with_result = (proposal, action_method(proposal))
+
+        proposals_with_results.append(proposal_with_result)
+
+    return proposals_with_results
+
+
+def cancel_proposal(proposal):
+    results = {}
+    if proposal.type == ProposalType.CREATION.name:
+        learning_unit_year = proposal.learning_unit_year
+        results = (business_deletion.check_can_delete_ignoring_proposal_validation(learning_unit_year))
+        if not results:
+            results = (business_deletion.delete_from_given_learning_unit_year(learning_unit_year))
+    else:
+        reinitialize_data_before_proposal(proposal)
+    delete_learning_unit_proposal(proposal)
+    return results
+
+
+def consolidate_proposal(proposal):
+    results = {ERROR: [_("Proposal is neither accepted nor refused.")]}
+    if proposal.state == proposal_state.ProposalState.REFUSED.name:
+        results = cancel_proposal(proposal)
+    elif proposal.state == proposal_state.ProposalState.ACCEPTED.name:
+        results = _consolidate_accepted_proposal(proposal)
+        if not results.get(ERROR):
+            delete_learning_unit_proposal(proposal)
+    return results
+
+
+def _consolidate_accepted_proposal(proposal):
+    if proposal.type == proposal_type.ProposalType.CREATION.name:
+        return _consolidate_creation_proposal_accepted(proposal)
+    elif proposal.type == proposal_type.ProposalType.SUPPRESSION.name:
+        return _consolidate_suppression_proposal_accepted(proposal)
+    return _consolidate_modification_proposal_accepted(proposal)
+
+
+def _consolidate_creation_proposal_accepted(proposal):
+    proposal.learning_unit_year.learning_unit.end_year = proposal.learning_unit_year.academic_year.year
+
+    results = {SUCCESS: edit_learning_unit_end_date(proposal.learning_unit_year.learning_unit, None)}
+    return results
+
+
+def _consolidate_suppression_proposal_accepted(proposal):
+    initial_end_year = proposal.initial_data["learning_unit"]["end_year"]
+    new_end_year = proposal.learning_unit_year.learning_unit.end_year
+
+    proposal.learning_unit_year.learning_unit.end_year = initial_end_year
+    new_academic_year = find_academic_year_by_year(new_end_year)
+    try:
+        results = {SUCCESS: edit_learning_unit_end_date(proposal.learning_unit_year.learning_unit, new_academic_year)}
+    except IntegrityError as err:
+        results = {ERROR: err.args[0]}
+    return results
+
+
+def _consolidate_modification_proposal_accepted(proposal):
+    next_luy = proposal.learning_unit_year.get_learning_unit_next_year()
+    if next_luy:
+        fields_to_update = {}
+        fields_to_update.update(model_to_dict(proposal.learning_unit_year,
+                                              fields=proposal.initial_data["learning_unit_year"].keys(),
+                                              exclude=("id",)))
+        fields_to_update.update(model_to_dict(proposal.learning_unit_year.learning_unit,
+                                              fields=proposal.initial_data["learning_unit"].keys(),
+                                              exclude=("id",)))
+        fields_to_update.update(model_to_dict(proposal.learning_unit_year.learning_container_year,
+                                              fields=proposal.initial_data["learning_container_year"].keys(),
+                                              exclude=("id",)))
+        fields_to_update_clean = {}
+        for field_name, field_value in fields_to_update.items():
+            fields_to_update_clean[field_name] = _clean_attribute_initial_value(field_name, field_value)
+
+        entities_to_update = find_entities_grouped_by_linktype(proposal.learning_unit_year.learning_container_year)
+
+        update_learning_unit_year_with_report(next_luy, fields_to_update_clean, entities_to_update,
+                                              override_postponement_consistency=True)
+    return {}
+
+
+def compute_proposal_state(a_person):
+    return proposal_state.ProposalState.CENTRAL.name if a_person.is_central_manager() \
+        else proposal_state.ProposalState.FACULTY.name
+
+
+def copy_learning_unit_data(learning_unit_year):
+    learning_container_year = learning_unit_year.learning_container_year
+    entities_by_type = entity_container_year.find_entities_grouped_by_linktype(learning_container_year)
+    learning_container_year_values = _get_attributes_values(learning_container_year,
+                                                            INITIAL_DATA_FIELDS['learning_container_year'])
+    learning_unit_values = _get_attributes_values(learning_unit_year.learning_unit,
+                                                  INITIAL_DATA_FIELDS['learning_unit'])
+    learning_unit_year_values = _get_attributes_values(learning_unit_year,
+                                                       INITIAL_DATA_FIELDS['learning_unit_year'])
+    learning_unit_year_values["credits"] = float(learning_unit_year.credits) if learning_unit_year.credits else None
+    return get_initial_data(entities_by_type, learning_container_year_values, learning_unit_values,
+                            learning_unit_year_values)
+
+
+def _get_attributes_values(obj, attributes_name):
+    return model_to_dict(obj, fields=attributes_name)
+
+
+def get_initial_data(entities_by_type, learning_container_year_values, learning_unit_values, learning_unit_year_values):
+    initial_data = {
+        "learning_container_year": learning_container_year_values,
+        "learning_unit_year": learning_unit_year_values,
+        "learning_unit": learning_unit_values,
+        "entities": get_entities(entities_by_type)
+    }
+    return initial_data
+
+
+def get_entities(entities_by_type):
+    return {entity_type: get_entity_by_type(entity_type, entities_by_type) for entity_type in ENTITY_TYPE_LIST}
+
+
+def get_entity_by_type(entity_type, entities_by_type):
+    if entities_by_type.get(entity_type):
+        return entities_by_type[entity_type].id
+    else:
+        return None

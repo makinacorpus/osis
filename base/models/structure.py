@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ from django.contrib import admin
 
 from base.models.academic_year import current_academic_years
 from base.models.enums import structure_type
+from base.models.osis_model_admin import OsisModelAdmin
 
 
-class StructureAdmin(admin.ModelAdmin):
+class StructureAdmin(OsisModelAdmin):
     list_display = ('acronym', 'title', 'part_of', 'organization', 'type')
-    fieldsets = ((None, {'fields': ('acronym', 'title', 'part_of', 'organization', 'type')}),)
     raw_id_fields = ('part_of',)
     search_fields = ['acronym']
 

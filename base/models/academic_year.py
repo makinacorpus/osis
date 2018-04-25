@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,9 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
+
 from django.db import models
 from django.utils import timezone
+
 from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
+
+LEARNING_UNIT_CREATION_SPAN_YEARS = 6
 
 
 class AcademicYearAdmin(SerializableModelAdmin):
@@ -77,18 +82,24 @@ def find_academic_year_by_year(year):
         return None
 
 
-def find_academic_years(start_date=None, end_date=None):
+def find_academic_years(start_date=None, end_date=None, start_year=None, end_year=None):
     """"Return all academic years ordered by year
 
         Keyword arguments:
             start_date -- (default None)
             end_date -- (default None)
+            start_year -- (default None)
+            end_year -- (default None)
     """
     queryset = AcademicYear.objects.all()
     if start_date is not None:
         queryset = queryset.filter(start_date__lte=start_date)
     if end_date is not None:
         queryset = queryset.filter(end_date__gte=end_date)
+    if start_year is not None:
+        queryset = queryset.filter(year__gte=start_year)
+    if end_year is not None:
+        queryset = queryset.filter(year__lte=end_year)
 
     return queryset.order_by('year')
 
@@ -106,3 +117,13 @@ def current_academic_year():
 def starting_academic_year():
     """ If we have two academic year [2015-2016] [2016-2017]. It will return [2016-2017] """
     return current_academic_years().last()
+
+
+def compute_max_academic_year_adjournment():
+    return starting_academic_year().year + LEARNING_UNIT_CREATION_SPAN_YEARS
+
+
+def get_last_academic_years(last_years=10):
+    today = datetime.date.today()
+    date_ten_years_before = today.replace(year=today.year - last_years)
+    return find_academic_years().filter(start_date__gte=date_ten_years_before)

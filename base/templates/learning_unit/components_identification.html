@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@
             <th>{% trans 'volume_partial'%}</th>
             <th>{% trans 'volume_remaining'%}</th>
             <th>{% trans 'real_on_planned_classrooms' %}</th>
+            {% block additional_entities_titles %}
+                {% include "learning_unit/blocks/additional_entities_titles.html" %}
+            {% endblock %}
         </thead>
         <tbody>
         {% for component in components %}
@@ -51,6 +54,9 @@
                         {{ component.learning_component_year.planned_classes| default_if_none:'0' }}
                 </span>
             </td>
+            {% block additional_requirement_entity_volumes %}
+                {% include "learning_unit/blocks/additional_requirement_entity_volumes.html" %}
+            {% endblock %}
         </tr>
         {% endfor %}
         </tbody>

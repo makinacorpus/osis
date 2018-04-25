@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ class OfferProposition(SerializableModel):
     start_edit_title = models.DateField(default=timezone.now)
     end_edit_title = models.DateField(default=timezone.now)
     offer_proposition_group = models.ForeignKey(OfferPropositionGroup, null=True, blank=True)
+    global_email_to_commission = models.BooleanField(default=False)
 
     @property
     def in_periode_visibility_proposition(self):

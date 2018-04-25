@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,15 +28,20 @@ from django.utils.translation import ugettext_lazy as _
 PHD_SUPERVISOR = 'PHD_SUPERVISOR'
 SUPERVISION = 'SUPERVISION'
 SUPERVISION_ASSISTANT = 'SUPERVISION_ASSISTANT'
+SUPERVISION_DAF = 'SUPERVISION_DAF'
+SUPERVISION_DAF_ASSISTANT = 'SUPERVISION_DAF_ASSISTANT'
 RESEARCH = 'RESEARCH'
 RESEARCH_ASSISTANT = 'RESEARCH_ASSISTANT'
 VICE_RECTOR = 'VICE_RECTOR'
 VICE_RECTOR_ASSISTANT = 'VICE_RECTOR_ASSISTANT'
 
-ROLE_CHOICES = ((PHD_SUPERVISOR, _(PHD_SUPERVISOR)),
-           (SUPERVISION, _(SUPERVISION)),
-           (SUPERVISION_ASSISTANT, _(SUPERVISION_ASSISTANT)),
-           (RESEARCH, _(RESEARCH)),
-           (RESEARCH_ASSISTANT, _(RESEARCH_ASSISTANT)),
-           (VICE_RECTOR, _(VICE_RECTOR)),
-           (VICE_RECTOR_ASSISTANT, _(VICE_RECTOR_ASSISTANT)))
+ROLE_CHOICES = (
+    (PHD_SUPERVISOR, _(PHD_SUPERVISOR)),
+    (SUPERVISION, _(SUPERVISION)),
+    (SUPERVISION_ASSISTANT, _(SUPERVISION_ASSISTANT)),
+    (SUPERVISION_DAF, _(SUPERVISION_DAF)),
+    (SUPERVISION_DAF_ASSISTANT, _(SUPERVISION_DAF_ASSISTANT)),
+    (RESEARCH, _(RESEARCH)),
+    (RESEARCH_ASSISTANT, _(RESEARCH_ASSISTANT)),
+    (VICE_RECTOR, _(VICE_RECTOR)),
+    (VICE_RECTOR_ASSISTANT, _(VICE_RECTOR_ASSISTANT)))

@@ -9,7 +9,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -129,13 +129,23 @@
                     {% trans mandate.renewal_type %}
                 </div>
             </div>
-            {% for structure in mandate.mandatestructure_set.all|dictsort:"structure.type" %}
+            {% if mandate.renewal_type == assistant_mandate_renewal.EXCEPTIONAL %}
+                <div class="row" style="padding-top: 2px;">
+                <div class="col-md-3">
+                    {% trans 'justification' %}
+                </div>
+                <div class="col-md-9">
+                    {{mandate.justification}}
+                </div>
+            </div>
+            {% endif %}
+            {% for this_entity in entities %}
                 <div class="row" style="padding-top: 2px;">
                     <div class="col-md-3">
-                        {% trans structure.structure.type|lower %}
+                        {% trans this_entity.entity_type %}
                     </div>
                     <div class="col-md-9">
-                        {{structure.structure.acronym}}
+                        {{this_entity.acronym}}
                     </div>
                 </div>
             {% endfor %}
@@ -253,7 +263,7 @@
                     <div class="col-md-3">
                         {% trans 'conferences_contributor' %}
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-9">
                         {{ mandate.conferences|default_if_none:"n/a" }}
                     </div>
                 </div>
@@ -315,18 +325,18 @@
     	</div>
         <div class="form-group" style="padding-top: 10px;">
             <div class="row" style="padding-top: 2px;">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {% trans 'function_outside_university' %}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-8">
                     {{ mandate.external_functions|default_if_none:"n/a" }}
                 </div>
             </div>
             <div class="row" style="padding-top: 2px;">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {% trans 'external_post' %}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-8">
                     {{ mandate.external_contract|default_if_none:"n/a" }}
                 </div>
             </div>
@@ -357,7 +367,7 @@
                 {% for learning_unit in learning_units %}
                     <td>{{ learning_unit.learning_unit_year.academic_year }}</td>
                     <td>{{ learning_unit.learning_unit_year.acronym }}</td>
-                    <td>{{ learning_unit.learning_unit_year.title }}</td>
+                    <td>{{ learning_unit.learning_unit_year.complete_title }}</td>
                     <td>{{ learning_unit.sessions_duration }}h</td>
                     <td>{{ learning_unit.sessions_number }}</td>
                     <td>{{ learning_unit.series_number }}</td>
@@ -490,10 +500,10 @@
         </div>
         <div class="form-group" style="padding-top: 10px;">
             <div class="row" style="padding-top: 2px;">
-                <div class="col-md-6">
+                <div class="col-md-3">
                     {% trans 'formations' %}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-9">
                     {{ mandate.formations|default_if_none:"n/a" }}
                 </div>
             </div>
@@ -546,10 +556,10 @@
         </div>
         <div class="form-group" style="padding-top: 10px;">
             <div class="row" style="padding-top: 2px;">
-                <div class="col-md-5">
+                <div class="col-md-3">
                     {% trans 'activities_report_remark' %}
                 </div>
-                <div class="col-md-7">
+                <div class="col-md-9">
                     {{ mandate.activities_report_remark|default_if_none:"n/a" }}
                 </div>
             </div>

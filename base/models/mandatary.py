@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,15 +25,12 @@
 ##############################################################################
 from django.db import models
 from django.contrib import admin
+from base.models.osis_model_admin import OsisModelAdmin
 
 
-class MandataryAdmin(admin.ModelAdmin):
+class MandataryAdmin(OsisModelAdmin):
     list_display = ('mandate', 'person', 'start_date', 'end_date')
-    fieldsets = ((None, {'fields': ('mandate',
-                                    'person',
-                                    'start_date',
-                                    'end_date')}),)
-    
+
     raw_id_fields = ('mandate', 'person')
     search_fields = ['person__first_name', 'person__last_name']
 

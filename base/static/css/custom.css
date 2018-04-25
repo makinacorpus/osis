@@ -120,3 +120,7 @@ table.volumes thead{
 .badge.danger-color {
     background-color: #d9534f;
 }
+
+.no_label{
+    font-weight: normal;
+}

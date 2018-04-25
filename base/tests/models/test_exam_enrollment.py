@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ class ExamEnrollmentTest(TestCase):
         self.academic_year = test_academic_year.create_academic_year()
         self.offer_year = test_offer_year.create_offer_year('SINF1BA', 'Bachelor in informatica', self.academic_year)
         self.learn_unit_year = LearningUnitYearFactory(acronym='LSINF1010',
-                                                       title='Introduction to algorithmic',
+                                                       specific_title='Introduction to algorithmic',
                                                        academic_year=self.academic_year)
         self.session_exam = test_session_exam.create_session_exam(1, self.learn_unit_year, self.offer_year)
         self.student = test_student.create_student('Pierre', 'Lacazette', '12345678')

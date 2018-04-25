@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load form_field %}
 {% load static %}
+{% load bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -10,7 +11,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -34,39 +35,20 @@
 
 
 {% block style %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap-datetimepicker.min.css' %}" type='text/css'>
-    <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}" type='text/css'>
-    <link rel="stylesheet" href="{% static 'css/daterangepicker.css' %}" type='text/css'>
+    {% include "education_group/blocks/datetimepicker_imports_css.html" %}
 {% endblock style %}
 
 {% block content %}
-    {% include "education_group/header.html" %}
+{% include "education_group/header.html" %}
 <div class="panel panel-default">
     <div class="panel-body" id="tabs">
-
-
         <div class="tab-content" id="tab_content">
             <form method="post">
                 {% csrf_token %}
                 <div role="tabpanel" class="tab-pane active" id="administrative_data">
                     <div class="panel panel-default">
                     <div class="panel-body">
-                        <div class="form-inline">
-
-                            {% for field in course_enrollment %}
-                            <label for="{{ field.id }}">{{ field.label_tag }}</label>
-                            {{ course_enrollment.non_field_errors }}
-                            <div class="form-group {% if field.errors %}has-error{% endif %}">
-                                {% if field.help_text %}
-                                    <span class="help-block">{{ field.help_text }}</span>
-                                {% endif %}
-                                {% if field.errors %}
-                                    <span class="help-block">{{ field.errors|join:"<br\>" }}</span>
-                                {% endif %}
-                                {{ field }}
-                            </div>
-                            {% endfor %}
-                        </div>
+                        {% bootstrap_form course_enrollment layout='horizontal' %}
                     </div>
                         <table class="table">
                             <thead>
@@ -82,116 +64,30 @@
 
                                 {% for field in formset_session.forms.0 %}
                                    <tr>
-                                       <td><label>{{ field.label }}</label></td>
+                                       <td>{% bootstrap_label field.label %}</td>
                                        {% for form in formset_session %}
                                             <td>
-                                                {% with form|select_field:field.name as current_field %}
-                                                <div class="form-group {% if current_field.errors %}has-error{% endif %}">
-                                                        {% if current_field.help_text %}
-                                                            <span class="help-block">{{ current_field.help_text }}</span>
-                                                        {% endif %}
-                                                        {% if current_field.errors %}
-                                                            <span class="help-block">{{ current_field.errors|join:"<br \>" }}</span>
-                                                        {% endif %}
-                                                        {{ current_field }}
-                                                </div>
-                                                {% endwith %}
+                                            {% with form|select_field:field.name as current_field %}
+                                                {% bootstrap_field current_field show_label=False %}
+                                            {% endwith %}
                                             </td>
                                        {%  endfor %}
                                    </tr>
                                 {%  endfor %}
                             </tbody>
                         </table>
-                        <br>
                     </div>
                 </div>
                 <div class="pull-right">
-                    <input type="submit" class="btn btn-primary" value="{% trans 'Save' %}"/>
-                    <button class="btn btn-default"
-                            href="{% url 'education_group_administrative' education_group_year_id %}">
-                        {% trans 'cancel' %}
-                    </button>
+                    {% bootstrap_button _("Save") button_type="submit" button_class="btn-primary" %}
+                    {% bootstrap_button _("cancel") button_type="reset"  %}
                 </div>
             </form>
-            <br>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/moment.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
-    <script src="{% static 'js/daterangepicker.js' %}"></script>
-
-    <script>
-        function set_config(config, input) {
-            config.minDate = input.data("mindate");
-            config.maxDate = input.data("maxdate");
-            config.format = input.data('format');
-            config.showToday = false;
-            config.useCurrent = false;
-        }
-
-        $(document).ready(function() {
-
-            $('.datepicker').each(function () {
-                var config = {
-                    pickTime: false,
-                    language: '{{ LANGUAGE_CODE }}'
-                };
-
-                set_config(config, $(this));
-
-                $(this).datetimepicker(config);
-            });
-            $('.timepicker').each(function () {
-                var config = {
-                    pickDate: false,
-                    language: '{{ LANGUAGE_CODE }}'
-                };
-
-                set_config(config, $(this));
-
-                $(this).datetimepicker(config);
-            });
-
-            $('.datetimepicker').each(function () {
-                var config = {
-                    language: '{{ LANGUAGE_CODE }}'
-                };
-                set_config(config, $(this));
-
-                $(this).datetimepicker(config);
-
-            });
-
-            $('.daterange').each(function () {
-
-                var format =  $(this).data('format');
-
-                var config = {
-                    autoUpdateInput: false,
-                    locale: {
-                        format: format,
-                        language: '{{ LANGUAGE_CODE }}',
-                        cancelLabel: 'Clear'
-                    }
-                };
-
-                set_config(config, $(this));
-
-                $(this).daterangepicker(config);
-
-                $(this).on('apply.daterangepicker', function(ev, picker) {
-                    $(this).val(picker.startDate.format(format)
-                        + ' - ' + picker.endDate.format(format)
-                    );
-                });
-                $(this).on('cancel.daterangepicker', function(ev, picker) {
-                    $(this).val('');
-                });
-            });
-        });
-    </script>
+    {% include "education_group/blocks/datetimepicker_imports_js.html" %}
 {% endblock script %}

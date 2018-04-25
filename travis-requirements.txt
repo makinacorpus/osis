@@ -16,6 +16,8 @@ pendulum==1.2.0
 djangorestframework==3.3.2
 gitpython
 requests==2.18.3
+django-bootstrap3==9.1.0
+django-ordered-model==1.4.3
 
 -r ./osis_common/requirements.txt
 -r ./internship/requirements.txt

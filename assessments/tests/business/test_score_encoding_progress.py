@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,8 +31,7 @@ from django.test import TestCase
 from assessments.business import score_encoding_progress
 from base.models.enums import number_session, academic_calendar_type
 from base.tests.factories.person import PersonFactory
-from base.tests.models import test_exam_enrollment, test_offer_enrollment,\
-                              test_learning_unit_enrollment
+from base.tests.models import test_exam_enrollment, test_offer_enrollment, test_learning_unit_enrollment
 from attribution.tests.models import test_attribution
 
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -46,15 +45,15 @@ from base.tests.factories.student import StudentFactory
 from base.tests.factories.program_manager import ProgramManagerFactory
 from base.tests.factories.tutor import TutorFactory
 
+
 class ScoreEncodingProgressTest(TestCase):
     def setUp(self):
         self.academic_year = AcademicYearFactory(year=datetime.date.today().year)
-        self.academic_calendar = AcademicCalendarFactory.build(title="Submission of score encoding - 1",
-                                                          start_date=self.academic_year.start_date,
-                                                          end_date=self.academic_year.end_date,
-                                                          academic_year=self.academic_year,
-                                                          reference=academic_calendar_type.SCORES_EXAM_SUBMISSION)
-        self.academic_calendar.save(functions=[])
+        self.academic_calendar = AcademicCalendarFactory(title="Submission of score encoding - 1",
+                                                         start_date=self.academic_year.start_date,
+                                                         end_date=self.academic_year.end_date,
+                                                         academic_year=self.academic_year,
+                                                         reference=academic_calendar_type.SCORES_EXAM_SUBMISSION)
         SessionExamCalendarFactory(academic_calendar=self.academic_calendar, number_session=number_session.ONE)
         # Offer year CHIM1BA
         self.offer_year = OfferYearFactory(

@@ -170,10 +170,11 @@ Execute the following commands to install PostgreSQL:
 
     $ sudo apt-get install postgresql
     $ sudo su - postgres -c "createuser -s $USER"
-    $ sudo apt-get install libpq-dev
+    $ sudo apt-get install python3-dev, libpq-dev
 
 The first command installs PostgreSQL and creates a user named after the current
-logged OS user. The library libpq-dev is also installed for development purposes.
+logged OS user. The libraries python3-dev and libpq-dev are also installed for
+development purposes.
 
 === Creating the Database
 
@@ -186,12 +187,8 @@ backend database:
     $ psql -d osis_local
       =# grant connect on database osis_local to osis;
       =# revoke connect on database osis_local from public;
+      =# alter user osis createdb;
       =# \q
-
-Now, install the necessary dependencies to allow a Python application to connect
-to PostgreSQL:
-
-    $ sudo apt-get install python3-dev libpq-dev
 
 [[installing-django]]
 === Installing and Configuring Django
@@ -213,13 +210,13 @@ The repository `uclouvain/osis` is a Django application. We already cloned that
 when <<installing-git>>. Now, we move forward installing the Python virtual 
 environment and other system dependencies:
 
-    $ sudo apt-get install build-essential python-virtualenv libjpeg-dev libpng-dev gettext
+    $ sudo apt-get install build-essential python3-venv libjpeg-dev libpng-dev gettext
 
 In the new repository, create a virtual environment to isolate all dependencies
 of the project:
 
     $ cd ~/python/projects/osis/osis
-    $ virtualenv --python=python3.4 venv
+    $ python3 -m venv venv
 
 [[installing-application]]
 === Installing the Application
@@ -228,6 +225,15 @@ Start the virtual environment and install the dependencies:
 
     $ source venv/bin/activate
     (venv)$ pip install -r requirements.txt
+
+Create a `.env` file based on `.env.example`:
+
+    $ cp .env.example .env
+
+The `.env` file makes it simple to manage environment variables, but it already
+contains all the necessary values for development purpose. Therefore, it
+doesn't need to be changed, unless you are installing OSIS in other
+environments.
 
 Create the data structure in the database:
 
@@ -245,13 +251,12 @@ To create the super user:
 You will need this user to login on OSIS for the first time and be able to
 create other users.
 
-To load the demonstration data:
+Optionally, you can load the demonstration data to have some basis for
+development and testing:
 
     (venv)$ python manage.py load_fixtures
 
-The demonstration data also create several other users.
-
-Before running the application we have a last step to do, which is running compiling 
+Before running the application we have a last step to do, which is compiling
 the translation files:
 
     (venv)$ python manage.py compilemessages
@@ -676,7 +681,7 @@ before any Python code:
     #    The core business involves the administration of students, teachers,
     #    courses, programs and so on.
     #
-    #    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+    #    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
     #
     #    This program is free software: you can redistribute it and/or modify
     #    it under the terms of the GNU General Public License as published by
@@ -703,7 +708,7 @@ For HTML/Template files, we change just the comment syntax:
      * The core business involves the administration of students, teachers,
      * courses, programs and so on.
      *
-     * Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+     * Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
      *
      * This program is free software: you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by

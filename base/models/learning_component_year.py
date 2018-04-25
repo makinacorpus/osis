@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@
 ##############################################################################
 from django.db import models
 
-from attribution.models.attribution_charge_new import AttributionChargeNew
-from base.models.enums import learning_component_year_type, learning_container_year_types
 from base.models import learning_class_year
-from osis_common.models.auditable_serializable_model import AuditableSerializableModel, AuditableSerializableModelAdmin
+from base.models.enums import learning_component_year_type, learning_container_year_types
+from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
 
-class LearningComponentYearAdmin(AuditableSerializableModelAdmin):
+
+class LearningComponentYearAdmin(SerializableModelAdmin):
     list_display = ('learning_container_year', 'title', 'acronym', 'type', 'comment')
     fieldsets = ((None, {'fields': ('learning_container_year', 'title', 'acronym', 'volume_declared_vacant',
                                     'type', 'comment', 'planned_classes', 'hourly_volume_partial')}),)
@@ -39,8 +39,9 @@ class LearningComponentYearAdmin(AuditableSerializableModelAdmin):
     list_filter = ('learning_container_year__academic_year',)
 
 
-class LearningComponentYear(AuditableSerializableModel):
+class LearningComponentYear(SerializableModel):
     external_id = models.CharField(max_length=100, blank=True, null=True)
+    changed = models.DateTimeField(null=True, auto_now=True)
     learning_container_year = models.ForeignKey('LearningContainerYear')
     title = models.CharField(max_length=255, blank=True, null=True)
     acronym = models.CharField(max_length=4, blank=True, null=True)
@@ -49,7 +50,6 @@ class LearningComponentYear(AuditableSerializableModel):
     comment = models.CharField(max_length=255, blank=True, null=True)
     planned_classes = models.IntegerField(blank=True, null=True)
     hourly_volume_partial = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
-    deleted = models.BooleanField(default=False)
     volume_declared_vacant = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True)
 
     def __str__(self):
@@ -75,9 +75,6 @@ class LearningComponentYear(AuditableSerializableModel):
     @property
     def real_classes(self):
         return len(learning_class_year.find_by_learning_component_year(self))
-
-    def get_attributions_charge(self):
-        return AttributionChargeNew.objects.filter(learning_component_year=self).select_related('attribution__tutor')
 
 
 def find_by_id(learning_component_year_id):

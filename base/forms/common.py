@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from django.utils.safestring import mark_safe
 
 
 def get_clean_data(datas_to_clean):
@@ -36,3 +37,10 @@ def treat_empty_or_str_none_as_none(data):
 class TooManyResultsException(Exception):
     def __init__(self):
         super().__init__("Too many results returned.")
+
+
+def set_trans_txt(form, texts_list):
+    for trans_txt in texts_list:
+        text_label = trans_txt.text_label.label
+        text = trans_txt.text if trans_txt.text else ""
+        setattr(form, text_label, mark_safe(text))

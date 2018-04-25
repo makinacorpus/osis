@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.test import TestCase
-from django.core.urlresolvers import reverse
 from django.core.urlresolvers import resolve
-from assistant.views.messages import show_history
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+
 from assistant.utils.send_email import send_message_to_assistants, send_message_to_reviewers
+from assistant.views.messages import show_history
+from assistant.views.manager_reviews_view import reviews_view
+from assistant.views.manager_assistant_form import assistant_form_view
 
 
 class AssistantURLsTestCase(TestCase):
@@ -43,3 +46,11 @@ class AssistantURLsTestCase(TestCase):
     def test_url_resolves_to_manager_message_send_to_reviewers(self):
         found = resolve(reverse('send_message_to_reviewers'))
         self.assertEqual(found.func, send_message_to_reviewers)
+
+    def test_url_resolves_to_manager_reviews_view(self):
+        found = resolve(reverse('manager_reviews_view', args=[1]))
+        self.assertEqual(found.func, reviews_view)
+
+    def test_url_resolves_to_manager_assistant_form(self):
+        found = resolve(reverse('manager_assistant_form_view', args=[1]))
+        self.assertEqual(found.func, assistant_form_view)

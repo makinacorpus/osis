@@ -11,7 +11,7 @@
  * The core business involves the administration of students, teachers,
  * courses, programs and so on.
  *
- * Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+ * Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 <div class="page-header">
     <h2>{% trans 'scores_encoding' %}</h2>
 </div>
-{% include "template_messages.html" %}
+
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3 class="panel-title" style="font-size: 150%; color: #3399CC;">{{ learning_unit_year }}</h3>
@@ -98,7 +98,7 @@
         <div class="form-group">
             <label>{% trans 'progress' %}</label><br>
             <div class="progress">
-                <div class="progress-bar {% if progress == '100' %} progress-bar-success {% else %} progress-bar-warning {% endif %}" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%;">
+                <div class="progress-bar {% if progress_int == 100 %} progress-bar-success {% else %} progress-bar-warning {% endif %}" role="progressbar" aria-valuenow="{{ progress_int }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%;">
                     <span> 
 			<b> 
 			  {{ exam_enrollments_encoded }} / {{ total_exam_enrollments }}

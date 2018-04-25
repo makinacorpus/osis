@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,14 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
+
+from django.db import DatabaseError
 from django.test import TestCase
+from django.utils.translation import ugettext_lazy as _
+
 from base.models import learning_unit
+from base.models.enums import learning_unit_year_subtypes
+from base.templatetags.learning_unit import academic_years, academic_year
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.learning_container_year import LearningContainerYearFactory
 from base.tests.factories.learning_unit import LearningUnitFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
-from base.tests.factories.learning_container_year import LearningContainerYearFactory
-from base.models.enums import learning_unit_year_subtypes
-import datetime
 
 
 def create_learning_unit(acronym, title):
@@ -56,12 +61,6 @@ class LearningUnitTest(TestCase):
         LearningUnitFactory()
         self.assertEqual(2, len( learning_unit.find_by_ids( (l_unit_1.id, l_unit_2.id) )))
 
-    def test_search_by_acronym(self):
-        LearningUnitFactory(acronym="LT49786")
-        LearningUnitFactory()
-        LearningUnitFactory()
-        self.assertEqual(1, len(learning_unit.search(acronym="LT49786")))
-
     def test_get_partims_related(self):
         current_year = datetime.date.today().year
         academic_year = AcademicYearFactory(year=current_year)
@@ -86,3 +85,33 @@ class LearningUnitTest(TestCase):
         self.assertEqual(len(all_partims_container_year_1), 2)
         all_partims_container_year_2 = l_container_year_2.get_partims_related()
         self.assertEqual(len(all_partims_container_year_2), 0)
+
+    def test_academic_years_tags(self):
+        self.assertEqual(academic_years(2017, 2018), _('from').title()+" 2017-18 "+_('to').lower()+" 2018-19")
+        self.assertEqual(academic_years(None, 2018), "-")
+        self.assertEqual(academic_years(2017, None), _('from').title()+" 2017-18 ("+_('not_end_year').lower()+")")
+        self.assertEqual(academic_years(None, None), "-")
+
+    def test_academic_year_tags(self):
+        self.assertEqual(academic_year(2017), "2017-18")
+        self.assertEqual(academic_year(None), "-")
+
+    def test_learning_unit_start_end_year_constraint(self):
+        # Case same year for start/end
+        LearningUnitFactory(start_year=2017, end_year=2017)
+
+        # Case end_year < start year
+        with self.assertRaises(AttributeError):
+            LearningUnitFactory(start_year=2017, end_year=2016)
+
+        # Case end year > start year
+        LearningUnitFactory(start_year=2017, end_year=2018)
+
+    def test_delete_before_2015(self):
+        lu = LearningUnitFactory(start_year=2014, end_year=2018)
+
+        with self.assertRaises(DatabaseError):
+            lu.delete()
+
+        lu.start_year = 2015
+        lu.delete()

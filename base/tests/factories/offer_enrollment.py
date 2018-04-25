@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import datetime
+from base.tests.factories.education_group_year import EducationGroupYearFactory
 import factory
 import factory.fuzzy
 import string
@@ -43,3 +44,4 @@ class OfferEnrollmentFactory(factory.django.DjangoModelFactory):
     external_id = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     offer_year = factory.SubFactory(OfferYearFactory)
     student = factory.SubFactory(StudentFactory)
+    education_group_year = factory.SubFactory(EducationGroupYearFactory)

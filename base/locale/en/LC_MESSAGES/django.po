@@ -942,6 +942,9 @@ msgstr "Search/update the list"
 msgid "registration_id"
 msgstr "Registration ID"
 
+msgid "registration_id_does_not_match_email"
+msgstr "Registration ID does not match email"
+
 msgid "identification_number"
 msgstr "Number ID"
 
@@ -1053,9 +1056,6 @@ msgstr "A server error occured."
 msgid "server_error_message"
 msgstr "We will fix this as soon as possible"
 
-msgid "sessionn"
-msgstr "Session"
-
 msgid "short_title"
 msgstr "Short title"
 
@@ -1130,6 +1130,9 @@ msgstr "Temporary save (not submitted to the faculty yet)"
 
 msgid "the_coordinator_must_still_submit_scores"
 msgstr "The coordinator must still submit the scores"
+
+msgid "text"
+msgstr "Text"
 
 msgid "title"
 msgstr "Title"
@@ -1615,8 +1618,20 @@ msgstr "This feature is in testing phase"
 msgid "title_official_1"
 msgstr "Official title (Part 1, common with partims)"
 
+msgid "common_official_title"
+msgstr "Common official title"
+
+msgid "common_official_english_title"
+msgstr "Common official English title"
+
 msgid "title_official_2"
 msgstr "Official title (Part 2, specific to each partim)"
+
+msgid "official_title_proper_to_UE"
+msgstr "Official title proper to the learning unit"
+
+msgid "official_english_title_proper_to_UE"
+msgstr "Official English title proper to the learning unit"
 
 msgid "title_in_english"
 msgstr "Title in English"
@@ -1668,6 +1683,12 @@ msgstr "Allocation entity"
 
 msgid "additional_requirement_entity"
 msgstr "Additional requirement entity"
+
+msgid "additional_requirement_entity_1"
+msgstr "Additional requirement entity 1"
+
+msgid "additional_requirement_entity_2"
+msgstr "Additional requirement entity 2"
 
 msgid "requirement_entity_small"
 msgstr "Req. Entity"
@@ -1787,13 +1808,13 @@ msgid "create_learning_unit"
 msgstr "Create Learning Unit"
 
 msgid "existed_acronym"
-msgstr "Existed acronym for "
+msgstr "Existed code for "
 
 msgid "existing_acronym"
-msgstr "Existing acronym"
+msgstr "Existing code in "
 
 msgid "invalid_acronym"
-msgstr "Invalid acronym"
+msgstr "Invalid code"
 
 msgid "acronym_rules"
 msgstr "Site with one letter\n"
@@ -1882,16 +1903,16 @@ msgid "end_date_gt_begin_date"
 msgstr "The end year must be equals or upper than the start year"
 
 msgid "session_title"
-msgstr "Session"
+msgstr "Sessions"
 
 msgid "remarks_title"
 msgstr "Remarks"
 
 msgid "faculty_remark"
-msgstr "Faculty"
+msgstr "Faculty remark"
 
 msgid "other_remark"
-msgstr "Other"
+msgstr "Other remark"
 
 msgid "new_learning_unit"
 msgstr "New learning unit"
@@ -2212,8 +2233,8 @@ msgstr ""
 msgid "The learning unit %(acronym)s is related to the internship speciality %(speciality)s"
 msgstr ""
 
-msgid "%(subtype)s %(acronym)s is included in the group %(group)s of the program %(program)s for the year %(year)s"
-msgstr ""
+msgid "lu_included_in_group"
+msgstr "%(subtype)s %(acronym)s is included in the group %(group)s for the year %(year)s"
 
 msgid "%(subtype)s %(acronym)s has been deleted for the year %(year)s"
 msgstr ""
@@ -2306,7 +2327,7 @@ msgid "scores_diffusion"
 msgstr "Scores diffusion"
 
 msgid "session"
-msgstr "Session"
+msgstr "session"
 
 msgid "at"
 msgstr "at"
@@ -2349,6 +2370,15 @@ msgstr "Refused"
 
 msgid "success_modification_proposal"
 msgstr "You proposed a modification of type {} for the learning unit {}."
+
+msgid "proposal_edited_successfully"
+msgstr "Proposal edited successfully"
+
+msgid "proposals_cancelled_successfully"
+msgstr "Proposals cancelled successfully"
+
+msgid "proposals_consolidated_successfully"
+msgstr "Proposals consolidated successfully"
 
 msgid "content"
 msgstr "Content"
@@ -2416,6 +2446,9 @@ msgstr "p23"
 msgid "Put in proposal"
 msgstr ""
 
+msgid "Put in suppression proposal"
+msgstr ""
+
 msgid "Proposal for modification"
 msgstr ""
 
@@ -2440,14 +2473,382 @@ msgstr "Xls with learning units"
 msgid "%(date)s must be set within %(start_date)s and %(end_date)s"
 msgstr ""
 
-msgid "success_cancel_proposal"
-msgstr "The proposal for {} was cancelled."
-
 msgid "cancel_proposal"
 msgstr "Cancel proposal"
+
+msgid "edit_proposal"
+msgstr "Edit proposal"
+
+msgid "Consolidate proposal"
+msgstr ""
 
 msgid "msg_confirm_cancel_proposal"
 msgstr "Are you certain that you want to cancel the learning unit proposal ?"
 
 msgid "The administrative data has been successfully modified"
 msgstr ""
+
+msgid "vacant"
+msgstr "Vacant"
+
+msgid "team_management"
+msgstr "Team management"
+
+msgid "type_declaration_vacant"
+msgstr "Decision"
+
+msgid "procedure"
+msgstr "Procedure"
+
+msgid "educational_information_management"
+msgstr "Management of educational information"
+
+msgid "SUMMARY_COURSE_SUBMISSION"
+msgstr "Summary course submission"
+
+msgid "INTERNAL_TEAM"
+msgstr "Internal/team"
+
+msgid "substitute"
+msgstr "Substitute"
+
+msgid "not_end_year"
+msgstr "no planned end"
+
+msgid "edit_learning_unit_end_date"
+msgstr "Edit learning unit end date"
+
+msgid "new_partim"
+msgstr "Create a new partim"
+
+msgid "learning_unit_successfuly_created"
+msgstr "Learning unit <a href='%(link)s'> %(acronym)s (%(academic_year)s) </a> successfuly created."
+
+msgid "learning_unit_successfuly_deleted"
+msgstr "Learning unit {acronym} ({academic_year}) successfuly deleted."
+
+msgid "learning_unit_creation_academic_year_max_error"
+msgstr "Please select an academic year lower than {}."
+
+msgid "parent_greater_than_partim"
+msgstr "The selected end year (%(partim_end_year)s) is greater than the end year of the parent %(lu_parent)s"
+
+msgid "learning_unit_created"
+msgstr "Learning unit %(learning_unit)s created for the academic year %(academic_year)s"
+
+msgid "learning_unit_updated"
+msgstr "Learning unit {acronym} successfully updated."
+
+msgid "partim_greater_than_parent"
+msgstr "The learning unit %(learning_unit)s has a partim %(partim)s with an end year greater than %(year)s"
+
+msgid "partim"
+msgstr "Partim"
+
+msgid "partim_character_rules"
+msgstr "One letter or digit mandatory"
+
+msgid "invalid_partim_character"
+msgstr "Character already used"
+
+msgid "remark"
+msgstr "Remark"
+
+msgid "remark_english"
+msgstr "Remark in english"
+
+msgid "Ensure this value is less than %(limit_value)s."
+msgstr "Ensure this value is less than %(limit_value)s."
+
+msgid "Ensure this value is greater than %(limit_value)s."
+msgstr "Ensure this value is greater than %(limit_value)s."
+
+msgid "Entity_not_exist"
+msgstr "The entity %(entity_acronym)s does not exist for the selected academic year %(academic_year)s"
+
+msgid "edit_learning_unit"
+msgstr "Edit learning unit"
+
+msgid "requirement_entity_end_date_too_short"
+msgstr "The requirement entity lifetime is too short."
+
+msgid "requirement_and_allocation_entities_cannot_be_different"
+msgstr "The requirement and allocation entities cannot be different for this learning unit type."
+
+msgid "success_modification_learning_unit"
+msgstr "The learning unit has been updated."
+
+msgid "error_modification_learning_unit"
+msgstr "An error occured when updating the learning unit."
+
+msgid "cannot_set_internship_subtype_for_type_other_than_internship"
+msgstr "Internship subtype cannot bet set for learning unit type other than internship."
+
+msgid "%(subtype)s %(acronym)s is in proposal for the year %(year)s"
+msgstr ""
+
+msgid "volume_have_more_than_2_decimal_places"
+msgstr "The volume have more than 2 decimal places"
+
+msgid "Site"
+msgstr "Site"
+
+msgid "proposal_type"
+msgstr "Proposal type"
+
+msgid "proposal_status"
+msgstr "Status proposal"
+
+msgid "folder_entity"
+msgstr "Folder entity"
+
+msgid "proposals_search"
+msgstr "Proposal - Search"
+
+msgid "folder_num"
+msgstr "Folder num."
+
+msgid "ask_to_report_modification"
+msgstr "Do you want to report the modifications done to the next years ?"
+
+msgid "proposal_learning_unit_successfuly_created"
+msgstr "Proposal learning unit <a href='%(link)s'> %(acronym)s (%(academic_year)s) </a> successfuly created."
+
+msgid "new_learning_unit_proposal"
+msgstr "New learning unit proposal"
+
+msgid "proposal_creation"
+msgstr "Proposal of creation"
+
+msgid "proposal_update"
+msgstr "Proposal update"
+
+msgid "value_before_proposal"
+msgstr "Value before proposal"
+
+msgid "entity_not_found"
+msgstr "Entity not found.  Pershaps an error in the data"
+
+msgid "min_for_field"
+msgstr "Please enter a value greater than or equal to 0."
+
+msgid "max_for_field"
+msgstr "Please enter a value less than or equal to 500."
+
+msgid "force_state"
+msgstr "Force state"
+
+msgid "do_you_want_change_status_proposals"
+msgstr "Do you want to change the status of this proposals?"
+
+msgid "are_you_sure_to_change_state_from"
+msgstr "Are you sure to change the state from"
+
+msgid "must_set_common_title_or_specific_title"
+msgstr "You must either set the common title or the specific title"
+
+msgid "learning_unit_in_proposal_cannot_save"
+msgstr "The learning unit %(luy)s is in proposal, can not save the change from the year %(academic_year)s"
+
+msgid "by"
+msgstr "By"
+
+msgid "in_proposal"
+msgstr "Existing proposal"
+
+msgid "summary_locked"
+msgstr "blocked update"
+
+msgid "get_back_to_initial"
+msgstr "Get back to initial data"
+
+msgid "do_you_want_to_get_back_to_initial"
+msgstr "Do you want to get back to initial data?"
+
+msgid "error_proposal_suppression_to_initial"
+msgstr "An error occured when getting back to initial state one of the selected proposal is not in SUPPRESSION type. Nothing has been done"
+
+msgid "error_proposal_no_data"
+msgstr "An error occured when getting back to initial state. No valid data to submit"
+
+msgid "msg_confirm_delete_luy"
+msgstr "Are you certain that you want to delete the learning unit ?"
+
+msgid "already_existing_acronym"
+msgstr "Existing acronym"
+
+msgid "The value of field '%(field)s' is different between year %(year)s - %(value)s and year %(next_year)s - %(next_value)s"
+msgstr ""
+
+msgid "There is not the learning unit %(acronym)s - %(next_year)s"
+msgstr ""
+
+msgid "The value of field '%(field)s' for the learning unit %(acronym)s (%(component_type)s) is different between year %(year)s - %(value)s and year %(next_year)s - %(next_value)s"
+msgstr ""
+
+msgid "There is not %(component_type)s for the learning unit %(acronym)s - %(year)s but exist in %(existing_year)s"
+msgstr ""
+
+msgid "Educational information opening"
+msgstr ""
+
+msgid "Educational information ending"
+msgstr ""
+
+msgid "official_title_proper_to_partim"
+msgstr "Official title proper to the partim"
+
+msgid "official_english_title_proper_to_partim"
+msgstr "Official English title proper to the partim"
+
+msgid "Educational information submission dates updated"
+msgstr ""
+
+msgid "partim_credits_gt_parent_credits"
+msgstr "The credits value is greater than the credits value of the learning unit."
+
+msgid "partim_credits_equals_parent_credits"
+msgstr "The credits value is equal to the credits value of the learning unit."
+
+msgid "The learning unit has been updated until %(year)s."
+msgstr ""
+
+msgid "Prohibition to delete a learning unit before 2015."
+msgstr ""
+
+msgid "The entity '%(acronym)s' doesn't exist anymore in %(year)s"
+msgstr ""
+
+msgid "updated"
+msgstr "Updated"
+
+msgid "unupdated"
+msgstr "Unupdated"
+
+msgid "summary_list"
+msgstr "Education information status"
+
+msgctxt "bibliography"
+msgid "title"
+msgstr ""
+
+msgctxt "bibliography"
+msgid "mandatory"
+msgstr ""
+
+msgid "Bibliography"
+msgstr ""
+
+msgid "Modalities specific to IN and OUT mobility"
+msgstr ""
+
+msgid "The partim must be inactive because the parent is inactive"
+msgstr ""
+
+msgid "The parent must be active because there are partim active"
+msgstr ""
+
+msgid "educational_information_update_reminder"
+msgstr "Mail to remind educational information update"
+
+msgid "do_you_want_to_sent_email"
+msgstr "Do you want to sent email to remind to update the educational informations?"
+
+msgid "desc_mail_reminder"
+msgstr "Sent email to remind to update educational information"
+
+msgid "success_mail_reminder"
+msgstr "Reminding mails sent"
+
+msgid "consolidate"
+msgstr "Consolidate"
+
+msgid "do_you_want_to_consolidate"
+msgstr "Do you want to consolidate ?"
+
+msgid "need_no_reminder"
+msgstr "Need no reminder"
+
+msgid "Proposal %(acronym)s (%(academic_year)s) cannot be consolidated."
+msgstr ""
+
+msgid "Proposal %(acronym)s (%(academic_year)s) successfully consolidated."
+msgstr ""
+
+msgid "Proposal %(acronym)s (%(academic_year)s) cannot be canceled."
+msgstr ""
+
+msgid "Proposal %(acronym)s (%(academic_year)s) successfully canceled."
+msgstr ""
+
+msgid "A report has been sent."
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "Failure"
+msgstr ""
+
+msgid "Remarks"
+msgstr ""
+
+msgid "Learning unit"
+msgstr ""
+
+msgid "Research criteria"
+msgstr ""
+
+msgid "The learning unit %(acronym)s is included in the following education groups"
+msgstr ""
+
+msgid "type_code_formation"
+msgstr "Formation's type"
+
+msgid "absolute_and_relative_credits"
+msgstr "Relative / Absolute <br>credits"
+
+msgid "Proposal is neither accepted nor refused."
+msgstr ""
+
+msgid "learning_achievements"
+msgstr "Learning achievements"
+
+msgid "up"
+msgstr "Up"
+
+msgid "down"
+msgstr "Down"
+
+msgid "learning_achievements_headline"
+msgstr "At the end of this learning unit, the student is able to:"
+
+msgid "User %(person)s do not have rights on this proposal."
+msgstr ""
+
+msgid "Enrollments to learning unit"
+msgstr ""
+
+msgid "Training"
+msgstr ""
+
+msgid "Enrollments to training"
+msgstr ""
+
+msgid "Enrolled to learning unit"
+msgstr "Enrollments to learning unit"
+
+msgid "No proposals was selected."
+msgstr ""
+
+msgid "Proposal %(acronym)s (%(academic_year)s) successfully changed state."
+msgstr ""
+
+msgid "Proposal %(acronym)s (%(academic_year)s) cannot be changed state."
+msgstr ""
+
+msgid "cancellation"
+msgstr ""
+
+msgid "consolidation"
+msgstr "consolidation"

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,12 @@ OTHER_INDIVIDUAL = "OTHER_INDIVIDUAL"
 MASTER_THESIS = "MASTER_THESIS"
 EXTERNAL = "EXTERNAL"
 
+LEARNING_CONTAINER_YEAR_TYPES_MUST_HAVE_SAME_ENTITIES = [
+    MASTER_THESIS,
+    INTERNSHIP,
+    DISSERTATION
+]
+
 LEARNING_CONTAINER_YEAR_TYPES = (
     (COURSE, _(COURSE)),
     (INTERNSHIP, _(INTERNSHIP)),
@@ -43,3 +49,17 @@ LEARNING_CONTAINER_YEAR_TYPES = (
     (MASTER_THESIS, _(MASTER_THESIS)),
     (EXTERNAL, _(EXTERNAL)),
 )
+
+LEARNING_CONTAINER_YEAR_TYPES_FOR_FACULTY = (
+    (OTHER_COLLECTIVE, _(OTHER_COLLECTIVE)),
+    (OTHER_INDIVIDUAL, _(OTHER_INDIVIDUAL)),
+    (MASTER_THESIS, _(MASTER_THESIS)),
+)
+
+LEARNING_CONTAINER_YEAR_TYPES_FOR_PROPOSAL_FACULTY = (
+    (COURSE, _(COURSE)),
+    (INTERNSHIP, _(INTERNSHIP)),
+    (DISSERTATION, _(DISSERTATION)),
+)
+
+CONTAINER_TYPE_WITH_DEFAULT_COMPONENT = [COURSE, MASTER_THESIS, OTHER_COLLECTIVE, INTERNSHIP]

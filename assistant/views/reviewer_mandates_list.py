@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,14 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.views.generic import ListView
-from django.core.urlresolvers import reverse
-from django.views.generic.edit import FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.views.generic import ListView
+from django.views.generic.edit import FormMixin
 
 from base.models import academic_year, entity_version
-from assistant.models import settings, assistant_mandate
+from base.models.entity import find_versions_from_entites
+
+from assistant.business.users_access import user_is_reviewer_and_procedure_is_open
+from assistant.business.mandate_entity import add_entities_version_to_mandates_list
+from assistant.models import assistant_mandate
 from assistant.models import reviewer, mandate_entity
 from assistant.forms import MandatesArchivesForm
 
@@ -43,11 +46,7 @@ class MandatesListView(LoginRequiredMixin, UserPassesTestMixin, ListView, FormMi
     is_supervisor = False
 
     def test_func(self):
-        if settings.access_to_procedure_is_open():
-            try:
-                return reviewer.find_by_person(self.request.user.person)
-            except ObjectDoesNotExist:
-                return False
+        return user_is_reviewer_and_procedure_is_open(self.request.user)
 
     def get_login_url(self):
         return reverse('access_denied')
@@ -78,7 +77,7 @@ class MandatesListView(LoginRequiredMixin, UserPassesTestMixin, ListView, FormMi
             self.request.session[
                 'selected_academic_year'] = selected_academic_year.id
             queryset = assistant_mandate.find_by_academic_year(selected_academic_year).filter(id__in=mandates_id).\
-                filter(state=current_reviewer.role.replace('_ASSISTANT', ''))
+                filter(state=current_reviewer.role.replace('_ASSISTANT', '').replace('_DAF', ''))
         else:
             queryset = assistant_mandate.find_by_academic_year(selected_academic_year).filter(id__in=mandates_id)
         return queryset
@@ -103,18 +102,7 @@ class MandatesListView(LoginRequiredMixin, UserPassesTestMixin, ListView, FormMi
         context['filter'] = self.kwargs.get("filter", None)
         context['year'] = academic_year.find_academic_year_by_id(
             self.request.session.get('selected_academic_year')).year
-        start_date = academic_year.find_academic_year_by_id(int(self.request.session.get(
-            'selected_academic_year'))).start_date
-        for mandate in context['object_list']:
-            entities = []
-            entities_id = mandate.mandateentity_set.all().order_by('id')
-            for entity in entities_id:
-                current_entityversion = entity_version.get_by_entity_and_date(entity.entity, start_date)[0]
-                if current_entityversion is None:
-                    current_entityversion = entity_version.get_last_version(entity.entity)
-                entities.append(current_entityversion)
-            mandate.entities = entities
-        return context
+        return add_entities_version_to_mandates_list(context)
 
     def get_initial(self):
         if self.request.session.get('selected_academic_year'):

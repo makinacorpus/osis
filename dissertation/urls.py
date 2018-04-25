@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from dissertation.utils.request import find_adviser_list_json
 from django.conf.urls import url
 from dissertation.views import dissertation, proposition_dissertation, information, offer_proposition, \
     upload_dissertation_file, upload_proposition_file
@@ -100,6 +101,15 @@ urlpatterns = [
         name='manager_dissertations_wait_eval_list'),
     url(r'^manager_dissertations_wait_recep_list$', dissertation.manager_dissertations_wait_recep_list,
         name='manager_dissertations_wait_recep_list'),
+    url(r'^manager_dissertations_wait_comm_json_list$', dissertation.manager_dissertations_wait_comm_jsonlist,
+        name='manager_dissertations_wait_comm_json_list'),
+    url(r'^manager_dissertation_role_list_json/(?P<pk>[0-9]+)$', dissertation.manager_dissertation_role_list_json,
+        name='manager_dissertation_role_list_json'),
+    url(r'^manager_dissertations_role_delete_by_ajax/(?P<pk>[0-9]+)$', dissertation.manager_dissertations_role_delete_by_ajax,
+        name='manager_dissertations_role_delete_by_ajax'),
+    url(r'^manager_dissertations_jury_new_ajax/', dissertation.manager_dissertations_jury_new_ajax,
+        name='manager_dissertations_jury_new_ajax'),
+    url(r'^manager_students_list/$', dissertation.manager_students_list, name='manager_students_list'),
 
     url(r'^manager_informations/$', information.manager_informations, name='manager_informations'),
     url(r'^manager_informations_add/$', information.manager_informations_add, name='manager_informations_add'),
@@ -146,6 +156,7 @@ urlpatterns = [
         name='manager_proposition_dissertation_new'),
     url(r'^manager_proposition_dissertation_search$', proposition_dissertation.manager_proposition_dissertations_search,
         name='manager_proposition_dissertations_search'),
+    url(r'^find_adviser_list/', find_adviser_list_json, name='find_adviser_list_json'),
 
     url(r'^my_dissertation_propositions$', proposition_dissertation.my_dissertation_propositions,
         name='my_dissertation_propositions'),

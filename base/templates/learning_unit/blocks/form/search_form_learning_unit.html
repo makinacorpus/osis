@@ -1,0 +1,72 @@
+{% extends "blocks/forms/search_form.html" %}
+{% load bootstrap3 %}
+
+{% comment "License" %}
+    * OSIS stands for Open Student Information System. It's an application
+    * designed to manage the core business of higher education institutions,
+    * such as universities, faculties, institutes and professional schools.
+    * The core business involves the administration of students, teachers,
+    * courses, programs and so on.
+    *
+    * Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
+    *
+    * This program is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    * GNU General Public License for more details.
+    *
+    * A copy of this license - GNU General Public License - is available
+    * at the root of the source code of this program.  If not,
+    * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% block search_form_row_1 %}
+    <div class="col-md-2">
+        {% bootstrap_field form.academic_year_id %}
+    </div>
+
+    <div class="col-md-2">
+        {% bootstrap_field form.acronym %}
+    </div>
+
+    <div class="col-md-4">
+        {% bootstrap_field form.title %}
+    </div>
+
+    <div class="col-md-2">
+        {% bootstrap_field form.container_type %}
+    </div>
+
+    <div class="col-md-2">
+        {% bootstrap_field form.subtype %}
+    </div>
+{% endblock %}
+
+{% block search_form_row_2 %}
+    <div class="col-md-2">
+        {% bootstrap_field form.status %}
+    </div>
+    <div class="col-md-2">
+        {% bootstrap_field form.tutor %}
+    </div>
+    <div class="col-md-2">
+        {% bootstrap_field form.requirement_entity_acronym %}
+    </div>
+    {% if search_type == 1 %}
+        <div class="col-md-2">
+            {% bootstrap_field form.with_entity_subordinated %}
+        </div>
+    {% elif search_type == 2 %}
+        <div class="col-md-2">
+            {% bootstrap_field form.allocation_entity_acronym %}
+        </div>
+    {% endif %}
+    <input type="hidden" id="xls_status" name="xls_status">
+
+{% endblock %}

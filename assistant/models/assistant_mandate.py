@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -87,9 +87,6 @@ class AssistantMandate(models.Model):
     contract_duration_fte = models.CharField(max_length=30)
     service_activities_remark = models.TextField(null=True, blank=True)
 
-def find_mandates_for_academic_year(academic_year):
-    return AssistantMandate.objects.filter(academic_year=academic_year)
-
 
 def find_mandate_by_assistant_for_academic_year(assistant, this_academic_year):
     return AssistantMandate.objects.get(assistant=assistant, academic_year=this_academic_year)
@@ -101,12 +98,13 @@ def find_mandate_by_id(mandate_id):
     except AssistantMandate.DoesNotExist:
         return None
 
+
 def find_mandate_by_academic_assistant(assistant):
     return AssistantMandate.objects.filter(assistant=assistant).order_by('academic_year')
 
 
 def find_by_academic_year(academic_year):
-    return AssistantMandate.objects.filter(academic_year=academic_year)
+    return AssistantMandate.objects.filter(academic_year=academic_year).order_by('assistant__person__last_name')
 
 
 def find_before_year_for_assistant(year, assistant):

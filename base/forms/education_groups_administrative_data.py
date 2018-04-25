@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,11 @@
 ##############################################################################
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.forms import formset_factory, SplitDateTimeWidget, SelectDateWidget
+from django.forms import formset_factory
 
-from base.business.offer_year_calendar import compute_deadline_by_offer_year_calendar
 from base.forms.bootstrap import BootstrapForm
-from base.forms.utils.datefield import DateRangeField, DatePickerInput, DATE_FORMAT, DateTimePickerInput, \
-    DATETIME_FORMAT
-from base.models import offer_year_calendar, session_exam_calendar
+from base.forms.utils.datefield import DateRangeField, DatePickerInput, DATE_FORMAT, DateTimePickerInput
+from base.models import offer_year_calendar
 from base.models.enums import academic_calendar_type
 from django.utils.translation import ugettext_lazy as _
 
@@ -128,7 +126,6 @@ class AdministrativeDataSessionForm(BootstrapForm):
             _set_values_in_offer_year_calendar(oyc, value)
 
             oyc.save()
-            compute_deadline_by_offer_year_calendar(oyc)
 
     def clean(self):
         for name, value in list(self.cleaned_data.items()):
@@ -178,11 +175,9 @@ class AdministrativeDataFormSet(forms.BaseFormSet):
             return kwargs
 
         q = offer_year_calendar.find_by_education_group_year(education_group_year)
-        sessions = session_exam_calendar.find_by_session_and_academic_year(index + 1,
-                                                                           education_group_year.academic_year)
-        academic_calendar_list = [s.academic_calendar for s in sessions]
-        kwargs['list_offer_year_calendar'] = q.filter(academic_calendar__in=academic_calendar_list)\
-            .select_related('academic_calendar') if academic_calendar_list else None
+        q = q.filter(academic_calendar__sessionexamcalendar__number_session=index+1,
+                     academic_calendar__academic_year=education_group_year.academic_year)
+        kwargs['list_offer_year_calendar'] = q.select_related('academic_calendar')
 
         return kwargs
 

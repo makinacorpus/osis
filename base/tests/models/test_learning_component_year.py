@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class LearningComponentYearTest(TestCase):
 
         learning_container = LearningContainer()
 
-        learning_container_year = LearningContainerYear(title="Biology",
+        learning_container_year = LearningContainerYear(common_title="Biology",
                                                         acronym="LBIO1212",
                                                         academic_year=self.current_academic_year,
                                                         learning_container=learning_container)
@@ -71,10 +71,10 @@ class LearningComponentYearTest(TestCase):
 
 
         #UE associée à un conteneur d'une année différente du composant
-        learning_unit_year = LearningUnitYear(  title="Biology",
-                                                acronym="LBIO1212",
-                                                academic_year=self.current_academic_year_different,
-                                                learning_container_year=learning_container_year)
+        learning_unit_year = LearningUnitYear(specific_title="Biology",
+                                              acronym="LBIO1212",
+                                              academic_year=self.current_academic_year_different,
+                                              learning_container_year=learning_container_year)
         #Association du conteneur et de son composant dont les années académiques diffèrent l'une de l'autre
         learning_unit_component = LearningUnitComponent(learning_component_year=learning_component_year,
                                                         learning_unit_year=learning_unit_year)

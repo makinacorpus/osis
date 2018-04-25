@@ -2,6 +2,8 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load components_classes %}
+{% load bootstrap3 %}
+
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
 * designed to manage the core business of higher education institutions,
@@ -9,7 +11,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -27,15 +29,15 @@
 {% endcomment %}
 
 {% block breadcrumb %}
-{% include "learning_unit/breadcrumb.html" %}
+    {% include "learning_unit/breadcrumb.html" %}
 {% endblock %}
 
 {% block content %}
 
-{% include "learning_unit/header.html" %}
+    {% include "learning_unit/blocks/header.html" %}
 <div class="panel panel-default">
     <div class="panel-body" id="tabs">
-        {% include "learning_unit/tabs.html" %}
+        {% include "learning_unit/blocks/tabs.html" %}
         <div class="tab-content" id="tab_content">
             <div role="tabpanel" class="tab-pane active" id="components">
                 <table class="table">
@@ -50,6 +52,9 @@
                             <th>{% trans 'volume_remaining' %}</th>
                             <th>{% trans 'real_on_planned_classrooms' %}</th>
                             <th>{% trans 'lu_usage' %}</th>
+                            {% block additional_entities_titles %}
+                                {% include "learning_unit/blocks/additional_entities_titles.html" %}
+                            {% endblock %}
                             <th></th>
                         </tr>
                     </thead>
@@ -95,15 +100,10 @@
                                 </span>
                             </td>
                             <td>{{ component.learning_unit_usage }}</td>
-                            <td>
-                                {% if perms.base.change_learningcomponentyear %}
-                                    <a class="component-edit-btn pull-right" href="#"
-                                       data-form="{% url 'learning_unit_component_edit' learning_unit_year_id=learning_unit_year.id %}?learning_component_year_id={{component.learning_component_year.id}}"
-                                       title="{% trans 'edit' %}">
-                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-                                    </a>
-                                {% endif %}
-                            </td>
+                            {% block additional_requirement_entity_volumes %}
+                                {% include "learning_unit/blocks/additional_requirement_entity_volumes.html" %}
+                            {% endblock %}
+                            <td></td>
                         </tr>
                         {% with component_number=forloop.counter0 classes_count=component.learning_component_year.classes|length|add:"1" %}
                                 <tr class="class_year class_year_head collapse collapse_classes{{ component_number }}">
@@ -112,7 +112,6 @@
                                     <td colspan="2">{% trans 'code' %}</td>
                                     <td colspan="5">{% trans 'description' %}</td>
                                     <td>{% trans 'lu_usage' %}</td>
-                                    <td></td>
                                 </tr>
                             {% for learning_class_year in component.learning_component_year.classes|dictsort:"acronym" %}
                                 <tr class="class_year collapse collapse_classes{{ component_number }}">
@@ -126,24 +125,17 @@
                                         {{ learning_class_year.description|default_if_none:'' }}
                                     </td>
                                     <td>{{ learning_class_year.used_by_learning_units_year }}</td>
-                                    <td>
-                                        {% if perms.base.change_learningclassyear and component.used_by_learning_unit %}
-                                            <a class="class-edit-btn pull-right" href="#"
-                                               data-form="{% url 'learning_class_year_edit' learning_unit_year_id=learning_unit_year.id %}?learning_class_year_id={{learning_class_year.id}}&learning_component_year_id={{component.learning_component_year.id}}"
-                                               title="{% trans 'edit' %}">
-                                                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-                                            </a>
-                                        {% endif %}
-                                    </td>
+
                                 </tr>
                             {% endfor %}
                         {% endwith %}
                     </tbody>
                     {% endfor %}
                 </table>
-                <a href="{% url 'learning_unit_volumes_management' learning_unit_year.id %}"
+                <a {% if can_manage_volume %}href="{% url 'learning_unit_volumes_management' learning_unit_year.id %}" {% endif %}
                    id="lnk_learning_unit_create" class="btn btn-default pull-right" role="button"
-                   title="{% trans 'learning_unit_create' %}">
+                   title="{% trans 'learning_unit_create' %}"
+                   {% if not can_manage_volume %} disabled {% endif %}>
                     Gérer les volumes
                 </a>
             </div>

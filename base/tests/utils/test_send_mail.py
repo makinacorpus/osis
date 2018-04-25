@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@ from base.tests.models import test_person, test_academic_year, test_learning_uni
     test_exam_enrollment
 from django.core.mail.message import EmailMultiAlternatives
 
+LEARNING_UNIT_YEARS_VARIABLE_PARAGRAPH_ = "<p>{{ learning_unit_years }}/p>"
+
 
 class TestSendMessage(TestCase):
     def setUp(self):
@@ -42,7 +44,7 @@ class TestSendMessage(TestCase):
 
         self.academic_year = test_academic_year.create_academic_year()
         self.learning_unit_year = LearningUnitYearFactory(acronym="TEST",
-                                                          title="Cours de test",
+                                                          specific_title="Cours de test",
                                                           academic_year=self.academic_year)
 
         self.offer_year = test_offer_year.create_offer_year("SINF2MA", "Master en Sciences Informatique",
@@ -86,7 +88,6 @@ class TestSendMessage(TestCase):
         self.assertEqual(len(recipients), 2)
         self.assertIsNone(attachments['attachments'])
 
-
     @patch("osis_common.messaging.send_message.EmailMultiAlternatives", autospec=True)
     def test_with_one_enrollment(self, mock_class):
         mock_class.send.return_value = None
@@ -100,6 +101,17 @@ class TestSendMessage(TestCase):
         self.assert_subject_mail(subject, self.learning_unit_year.acronym, self.offer_year.acronym)
         self.assertEqual(len(recipients), 2)
         self.assertIsNotNone(attachments)
+
+    @patch("osis_common.messaging.send_message.EmailMultiAlternatives", autospec=True)
+    def test_send_mail_for_educational_information_update(self, mock_class):
+        add_message_template_html_education_update()
+        add_message_template_txt_education_update()
+        mock_class.send.return_value = None
+        self.assertIsInstance(mock_class, EmailMultiAlternatives)
+        send_mail.send_mail_for_educational_information_update([self.person_1], [self.learning_unit_year])
+        call_args = mock_class.call_args
+        recipients = call_args[0][3]
+        self.assertEqual(len(recipients), 1)
 
     def assert_subject_mail(self, subject, learning_unit_acronym, offer_year_acronym):
         self.assertIn(learning_unit_acronym, subject)
@@ -162,3 +174,46 @@ def add_message_template_html():
     )
     msg_template.save()
 
+
+def add_message_template_txt_education_update():
+    msg_template = message_template.MessageTemplate(
+        reference=send_mail.EDUCATIONAL_INFORMATION_UPDATE_TXT,
+        subject="",
+        template=LEARNING_UNIT_YEARS_VARIABLE_PARAGRAPH_,
+        format="PLAIN",
+        language="en"
+    )
+    msg_template.save()
+
+    msg_template = message_template.MessageTemplate(
+        reference=send_mail.EDUCATIONAL_INFORMATION_UPDATE_TXT,
+        subject="",
+        template=LEARNING_UNIT_YEARS_VARIABLE_PARAGRAPH_,
+        format="PLAIN",
+        language="fr-be"
+    )
+    msg_template.save()
+
+
+def add_message_template_html_education_update():
+    msg_template = message_template.MessageTemplate(
+        reference=send_mail.EDUCATIONAL_INFORMATION_UPDATE_HTML,
+        subject="",
+        template="<p>{% autoescape off %}</p>"
+                 "<p>{{ learning_unit_years }}</p>\r\n\r\n"
+                 "<p>{% endautoescape %}</p>",
+        format="HTML",
+        language="fr-be"
+    )
+    msg_template.save()
+
+    msg_template = message_template.MessageTemplate(
+        reference=send_mail.EDUCATIONAL_INFORMATION_UPDATE_HTML,
+        subject="",
+        template="<p>{% autoescape off %}</p>"
+                 "<p>{{ learning_unit_years }}</p>\r\n\r\n"
+                 "<p>{% endautoescape %}</p>",
+        format="HTML",
+        language="en"
+    )
+    msg_template.save()

@@ -1,0 +1,17 @@
+{% load bootstrap3 i18n %}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <label>{% trans 'institution'%}</label><br>
+
+            {% if learning_unit_year.learning_container_year.campus %}
+                {{ learning_unit_year.learning_container_year.campus.organization.name }}
+            {% endif %}
+        </div>
+        {% bootstrap_field learning_container_year_form.campus %}
+        {% bootstrap_formset entity_container_form %}
+        {% bootstrap_field learning_unit_year_form.academic_year %}
+    </div>
+</div>
+

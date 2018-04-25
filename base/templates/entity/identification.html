@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,12 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% if can_user_post %}
+    {% block style %}
+        {% include "education_group/blocks/datetimepicker_imports_css.html" %}
+    {% endblock style %}
+ {% endif %}
 
 {% block breadcrumb %}
 {% include "entity/breadcrumb.html" %}
@@ -71,6 +77,14 @@
                         </div>
                     {% endif %}
                 </div>
+                <br>
+
+                {% if can_user_post %}
+                    {% include "entity/blocks/educational_summary_calendar_widget.html" %}
+                {% else %}
+                    {% include "entity/blocks/educational_summary_calendar_informations.html" %}
+                {% endif %}
+
                 {% if descendants %}
                 <br>
                 <div class="panel panel-default">
@@ -113,3 +127,9 @@
     </div>
 </div>
 {% endblock %}
+
+{% if can_user_post %}
+    {% block script %}
+        {% include "education_group/blocks/datetimepicker_imports_js.html" %}
+    {% endblock script %}
+{% endif %}

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ from django.db import models
 from django.contrib import admin
 from base.models.enums import number_session, academic_calendar_type
 from base.models import offer_year_calendar, academic_year
+from base.models.osis_model_admin import OsisModelAdmin
 
 
-class SessionExamCalendarAdmin(admin.ModelAdmin):
+class SessionExamCalendarAdmin(OsisModelAdmin):
     list_display = ('academic_calendar', 'number_session', 'changed')
     list_filter = ('academic_calendar__academic_year', 'number_session', 'academic_calendar__reference')
-    fieldsets = ((None, {'fields': ('number_session', 'academic_calendar')}),)
     raw_id_fields = ('academic_calendar',)
     search_fields = ['academic_calendar__title']
 
@@ -43,10 +43,7 @@ class SessionExamCalendar(models.Model):
     external_id = models.CharField(max_length=100, blank=True, null=True)
     changed = models.DateTimeField(null=True, auto_now=True)
     number_session = models.IntegerField(choices=number_session.NUMBERS_SESSION)
-    academic_calendar = models.ForeignKey('AcademicCalendar')
-
-    class Meta:
-        unique_together = (("number_session", "academic_calendar"),)
+    academic_calendar = models.OneToOneField('AcademicCalendar')
 
     def __str__(self):
         return u"%s - %s" % (self.academic_calendar, self.number_session)
@@ -126,3 +123,8 @@ def get_by_session_reference_and_academic_year(nb_session, a_reference, an_acade
                                                academic_calendar__academic_year=an_academic_year)
     except SessionExamCalendar.DoesNotExist:
         return None
+
+
+def get_number_session_by_academic_calendar(academic_calendar):
+    session = getattr(academic_calendar, 'sessionexamcalendar', None)
+    return session.number_session if session else None

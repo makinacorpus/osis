@@ -40,6 +40,9 @@ msgstr "Add a teaching unit"
 msgid "address"
 msgstr "Address"
 
+msgid "administrative_data"
+msgstr "Administrative data"
+
 msgid "advice"
 msgstr "Opinion"
 
@@ -109,6 +112,9 @@ msgstr "Prize(s) and/or distinction(s)"
 msgid "bad_filename"
 msgstr "Filename can not contains : ( ) % $ , ; : / = +"
 
+msgid "bad_person_msg"
+msgstr "Please enter the last name and first name of the person you are looking for and select the corresponding choice in the drop-down list"
+
 msgid "beginning"
 msgstr "Beginning"
 
@@ -126,6 +132,12 @@ msgstr "Choice"
 
 msgid "choose_person_as_reviewer_for"
 msgstr "Choose a person as reviewer for"
+
+msgid "columns_title_error"
+msgstr "The cols title are wrong."
+
+msgid "columns_number_error"
+msgstr "The number of cols is wrong."
 
 msgid "comment"
 msgstr "Comment"
@@ -193,6 +205,9 @@ msgstr "Dashboard"
 msgid "data_not_saved"
 msgstr "A problem occured, data have not been saved"
 
+msgid "date_format_error"
+msgstr "A date is invalid in the file"
+
 msgid "date_of_first_nomination"
 msgstr "Date of first nomination"
 
@@ -223,6 +238,9 @@ msgstr "Mail service management to assistants and Deans of Faculty"
 msgid "desc_lnk_export_mandates"
 msgstr "Exporting files to an XLSX file"
 
+msgid "desc_lnk_export_mandates_pdf"
+msgstr "Exporting all data to a PDF file"
+
 msgid "desc_lnk_import_mandates"
 msgstr "Importing files from an XLSX file"
 
@@ -246,6 +264,12 @@ msgstr "Emails"
 
 msgid "end"
 msgstr "End"
+
+msgid "end_date_contract"
+msgstr "Contract end date"
+
+msgid "entry_date_contract"
+msgstr "Contract start date"
 
 msgid "eq_fte"
 msgstr "Duration of contract (FTE)"
@@ -379,6 +403,9 @@ msgstr "The \"Teaching Units\" must be completed"
 
 msgid "learning_units_description"
 msgstr "Exercises, workshops, seminars - associated with hours of volume 2, which you personally assume"
+
+msgid "line_nbr"
+msgstr " at line number : "
 
 msgid "mandate"
 msgstr "Mandate"
@@ -554,8 +581,14 @@ msgstr "Submit an opinion"
 msgid "reviewer_delegation"
 msgstr "Delegation(s)"
 
+msgid "reviewer_delegation_add"
+msgstr "Add a delegate"
+
 msgid "reviewer_mandates_list"
 msgstr "List of files"
+
+msgid "review"
+msgstr "Opinion"
 
 msgid "reviews"
 msgstr "Opinions"
@@ -565,6 +598,9 @@ msgstr "Reviewer"
 
 msgid "reviewer_todo"
 msgstr "Files that can be treated"
+
+msgid "reviewer_with_same_role_already_exists_msg"
+msgstr "A reviewer having the same role for this entity already exists"
 
 msgid "reviewers"
 msgstr "Reviewers"
@@ -667,6 +703,12 @@ msgstr "Email address  of the promoter"
 
 msgid "supervision_review"
 msgstr "Opinion of the steering commitee"
+
+msgid "SUPERVISION_DAF"
+msgstr "DAF"
+
+msgid "SUPERVISION_DAF_ASSISTANT"
+msgstr "DAF representative"
 
 msgid "support_committee_reports"
 msgstr "Report of the steering committee (mandatory from the second renewal application)"

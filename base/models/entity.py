@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.contrib import admin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Case, When, Q, F
@@ -35,7 +34,7 @@ from osis_common.models.serializable_model import SerializableModel, Serializabl
 
 
 class EntityAdmin(SerializableModelAdmin):
-    list_display = ('id', 'external_id', 'organization', 'location', 'postal_code', 'phone')
+    list_display = ('most_recent_acronym', 'external_id', 'organization', 'location', 'postal_code', 'phone')
     search_fields = ['external_id', 'entityversion__acronym', 'organization__acronym', 'organization__name']
     readonly_fields = ('organization', 'external_id')
 
@@ -53,6 +52,14 @@ class Entity(SerializableModel):
     fax = models.CharField(max_length=255, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True, null=True)
 
+    @property
+    def most_recent_acronym(self):
+        try:
+            most_recent_entity_version = self.entityversion_set.filter(entity_id=self.id).latest('start_date')
+            return most_recent_entity_version.acronym
+        except ObjectDoesNotExist:
+            return None
+
     class Meta:
         verbose_name_plural = "entities"
 
@@ -60,7 +67,7 @@ class Entity(SerializableModel):
         return self.location and self.postal_code and self.city
 
     def __str__(self):
-        return "{0} - {1}".format(self.id, self.external_id)
+        return "{0} - {1}".format(self.most_recent_acronym, self.external_id)
 
 
 def search(**kwargs):
@@ -94,25 +101,23 @@ def get_by_external_id(external_id):
 
 
 def find_descendants(entities, date=None, with_entities=True):
-    if date is None:
-        date = timezone.now().date()
+    date = date or timezone.now().date()
 
     entities_descendants = set()
+    entities_by_id = entity_version.build_current_entity_version_structure_in_memory(date=date)
+
     for entity in entities:
-        entities_descendants |= _find_descendants(entity, date, with_entities)
+        _append_current_entity(entities_by_id, entities_descendants, entity, with_entities)
+        if entity.id in entities_by_id:
+            entities_descendants |= {
+                ent_version.entity for ent_version in entities_by_id[entity.id].get('all_children')
+            }
     return list(entities_descendants)
 
 
-def _find_descendants(entity, date=None, with_entities=True):
-    entities_descendants = set()
-    try:
-        entity_vers = entity_version.get_last_version(entity, date=date)
-        if with_entities:
-                entities_descendants.add(entity_vers.entity)
-        entities_descendants |= {entity_version_descendant.entity for entity_version_descendant in
-                                 entity_vers.find_descendants(date=date)}
-    finally:
-        return entities_descendants
+def _append_current_entity(entities_by_id, entities_descendants, entity, with_entities):
+    if with_entities and entities_by_id.get(entity.id):
+        entities_descendants.add(entity)
 
 
 def find_versions_from_entites(entities, date):
@@ -125,3 +130,10 @@ def find_versions_from_entites(entities, date):
                entityversion__start_date__lte=date).\
         annotate(acronym=F('entityversion__acronym')).annotate(title=F('entityversion__title')).\
         annotate(entity_type=F('entityversion__entity_type')).order_by(preserved)
+
+
+def find_by_id(an_id):
+    try:
+        return Entity.objects.get(pk=an_id)
+    except Entity.DoesNotExist:
+        return None

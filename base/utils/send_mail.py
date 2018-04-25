@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,14 +27,23 @@
 """
 Utility files for mail sending
 """
-
+import datetime
+from django.contrib.messages import ERROR
 from django.utils.translation import ugettext as _
+from openpyxl import Workbook
+from openpyxl.writer.excel import save_virtual_workbook, save_workbook
+
 from assessments.business import score_encoding_sheet
+from osis_common.document.xls_build import _adjust_column_width
 
 from osis_common.models import message_history as message_history_mdl
 from osis_common.messaging import message_config, send_message as message_service
 from base.models import person as person_mdl
-from osis_common.document import paper_sheet
+from osis_common.document import paper_sheet, xls_build
+
+EDUCATIONAL_INFORMATION_UPDATE_TXT = 'educational_information_update_txt'
+
+EDUCATIONAL_INFORMATION_UPDATE_HTML = 'educational_information_update_html'
 
 
 def send_mail_after_scores_submission(persons, learning_unit_name, submitted_enrollments, all_encoded):
@@ -55,7 +64,7 @@ def send_mail_after_scores_submission(persons, learning_unit_name, submitted_enr
                           'encoding_status':    _('encoding_status_ended') if all_encoded
                           else _('encoding_status_notended')
                           }
-    header_txt = ['acronym', 'sessionn', 'registration_number', 'lastname', 'firstname', 'score', 'documentation']
+    header_txt = ['acronym', 'session_title', 'registration_number', 'lastname', 'firstname', 'score', 'documentation']
     submitted_enrollments_data = [
         (
             enrollment.learning_unit_enrollment.offer_enrollment.offer_year.acronym,
@@ -73,47 +82,7 @@ def send_mail_after_scores_submission(persons, learning_unit_name, submitted_enr
     return message_service.send_messages(message_content)
 
 
-def send_mail_after_academic_calendar_changes(academic_calendar, offer_year_calendar, programm_managers):
-    """
-    Send an email to all the programme manager after changes has been made on a offer_year_calendar with customized
-    = True
-    :param academic_calendar:
-    :param offer_year_calendar:
-    :param programm_managers:
-    :return un error message if the template does not exists.
-    """
-
-    html_template_ref = 'academic_calendar_changes_html'
-    txt_template_ref = 'academic_calendar_changes_txt'
-    receivers = [message_config.create_receiver(manager.person.id, manager.person.email, manager.person.language)
-                 for manager in programm_managers]
-    suject_data = {'offer_year':            str(offer_year_calendar.offer_year.acronym),
-                   'academic_calendar':     str(academic_calendar)}
-    template_base_data = {
-        'offer_year_title': offer_year_calendar.offer_year.title,
-        'offer_year_acronym': offer_year_calendar.offer_year.acronym,
-        'academic_calendar': str(academic_calendar),
-    }
-    message_content = message_config.create_message_content(html_template_ref, txt_template_ref,
-                                                            None, receivers, template_base_data, suject_data)
-
-    return message_service.send_messages(message_content)
-
-
 def send_mail_after_the_learning_unit_year_deletion(managers, acronym, academic_year, msg_list):
-    """
-    Send email to the program managers after deletions made on a learning_unit_year or partials or classes
-    :param acronym: the deleted learning unit
-    :param academic_year: starting academic year at which the deletion must start (can be None if it is a learning_unit)
-    :param msg_list : the list of the messages detailing the deletion
-    :return An error message if the template is not in the database
-    """
-
-    # TODO : At the moment, there is no link between managers and learning_units. So here is an empty list.
-    #Later on, we will have to call a function like 'get_managers(learning_unit_year)' instead.
-    #Something like this :
-    #managers = learning_unit_year.get_managers_of_learning_unit_year(learning_unit_year)
-
     html_template_ref = 'learning_unit_year_deletion_html'
     txt_template_ref = 'learning_unit_year_deletion_txt'
     receivers = [message_config.create_receiver(manager.id, manager.email, manager.language) for manager in managers]
@@ -125,6 +94,102 @@ def send_mail_after_the_learning_unit_year_deletion(managers, acronym, academic_
     message_content = message_config.create_message_content(html_template_ref, txt_template_ref, None, receivers,
                                                             template_base_data, suject_data, None)
     return message_service.send_messages(message_content)
+
+
+def send_mail_cancellation_learning_unit_proposals(manager, tuple_proposals_results, research_criteria):
+    html_template_ref = 'learning_unit_proposal_canceled_html'
+    txt_template_ref = 'learning_unit_proposal_canceled_txt'
+    return _send_mail_action_learning_unit_proposal(manager, tuple_proposals_results, html_template_ref,
+                                                    txt_template_ref, "cancellation", research_criteria)
+
+
+def send_mail_consolidation_learning_unit_proposal(manager, tuple_proposals_results, research_criteria):
+    html_template_ref = 'learning_unit_proposal_consolidated_html'
+    txt_template_ref = 'learning_unit_proposal_consolidated_txt'
+    return _send_mail_action_learning_unit_proposal(manager, tuple_proposals_results, html_template_ref,
+                                                    txt_template_ref, "consolidation", research_criteria)
+
+
+def _send_mail_action_learning_unit_proposal(manager, tuple_proposals_results, html_template_ref, txt_template_ref,
+                                             operation, research_criteria):
+    receivers = [message_config.create_receiver(manager.id, manager.email, manager.language)]
+    suject_data = {}
+    template_base_data = {
+        "first_name": manager.first_name,
+        "last_name": manager.last_name
+    }
+    attachment = ("report.xlsx",
+                  build_proposal_report_attachment(manager, tuple_proposals_results, operation, research_criteria),
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    message_content = message_config.create_message_content(html_template_ref, txt_template_ref, None, receivers,
+                                                            template_base_data, suject_data, attachment=attachment)
+    return message_service.send_messages(message_content)
+
+
+# FIXME should be moved to osis_common
+def build_proposal_report_attachment(manager, proposals_with_results, operation, research_criteria):
+    table_data = _build_table_proposal_data(proposals_with_results)
+
+    xls_parameters = {
+        xls_build.LIST_DESCRIPTION_KEY: "Liste d'activités",
+        xls_build.FILENAME_KEY: 'Learning_units',
+        xls_build.USER_KEY: str(manager),
+        xls_build.WORKSHEETS_DATA: [
+            {
+                xls_build.CONTENT_KEY: table_data,
+                xls_build.HEADER_TITLES_KEY: [_('academic_year_small'), _('code'), _('title'), _('type'),
+                                              _("proposal_status"), _('status'), _('Remarks')],
+                xls_build.WORKSHEET_TITLE_KEY: 'Report'
+            }
+        ],
+        "operation": operation,
+        "research_criteria": research_criteria
+    }
+
+    return _create_xls(xls_parameters)
+
+
+def _build_table_proposal_data(proposals_with_results):
+    return [
+        (
+            proposal.learning_unit_year.academic_year.name,
+            proposal.learning_unit_year.acronym,
+            proposal.learning_unit_year.complete_title,
+            _(proposal.type),
+            _(proposal.state),
+            _("Success") if ERROR not in results else _("Failure"),
+            "\n".join(results.get(ERROR, []))
+        ) for (proposal, results) in proposals_with_results
+    ]
+
+
+# FIXME should be moved to osis_common
+def _create_xls(parameters_dict):
+    workbook = Workbook(encoding='utf-8')
+    sheet_number = 0
+    for worksheet_data in parameters_dict.get(xls_build.WORKSHEETS_DATA):
+        xls_build._build_worksheet(worksheet_data,  workbook, sheet_number)
+        sheet_number = sheet_number + 1
+
+    _build_worksheet_parameters(workbook, parameters_dict.get(xls_build.USER_KEY),
+                                parameters_dict.get("operation", ""), parameters_dict.get("research_criteria"))
+    return save_virtual_workbook(workbook)
+
+
+# FIXME should be moved to osis_common
+def _build_worksheet_parameters(workbook, a_user, operation, research_criteria):
+    worksheet_parameters = workbook.create_sheet(title=str(_('parameters')))
+    now = datetime.datetime.now()
+    worksheet_parameters.append([str(_('author')), str(a_user)])
+    worksheet_parameters.append([str(_('date')), now.strftime('%d-%m-%Y %H:%M')])
+    worksheet_parameters.append([_('Operation'), _(operation)])
+    if research_criteria:
+        worksheet_parameters.append([_('Research criteria')])
+        for research_key, research_value in research_criteria:
+            worksheet_parameters.append(["", research_key, str(research_value)])
+
+    _adjust_column_width(worksheet_parameters)
+    return worksheet_parameters
 
 
 def send_message_after_all_encoded_by_manager(persons, enrollments, learning_unit_acronym, offer_acronym):
@@ -160,7 +225,7 @@ def send_message_after_all_encoded_by_manager(persons, enrollments, learning_uni
         ) for enrollment in enrollments]
     enrollments_headers = (
         'acronym',
-        'sessionn',
+        'session_title',
         'registration_number',
         'lastname',
         'firstname',
@@ -199,3 +264,14 @@ def send_again(message_history_id):
         return message_service.send_again(receiver, message_history_id)
     else:
         return _('no_receiver_error')
+
+
+def send_mail_for_educational_information_update(teachers, learning_units_years):
+    html_template_ref = EDUCATIONAL_INFORMATION_UPDATE_HTML
+    txt_template_ref = EDUCATIONAL_INFORMATION_UPDATE_TXT
+    receivers = [message_config.create_receiver(teacher.id, teacher.email, teacher.language) for teacher in teachers]
+    template_base_data = {'learning_unit_years': learning_units_years}
+
+    message_content = message_config.create_message_content(html_template_ref, txt_template_ref, None, receivers,
+                                                            template_base_data, {}, None)
+    return message_service.send_messages(message_content)

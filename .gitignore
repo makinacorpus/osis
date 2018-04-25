@@ -23,7 +23,5 @@ backoffice/server_settings.py
 htmlcov/
 dev.py
 ghostdriver.log
-dev-requirements.txt
 .DS_Store
 .coveragerc
-/dev_requirements.txt

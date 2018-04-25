@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.core.urlresolvers import reverse_lazy
 import os
-
-from django.utils.translation import ugettext_lazy as _
 import sys
+
+from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 
 BASE_DIR = os.path.dirname((os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -67,6 +67,8 @@ INSTALLED_APPS = (
     'statici18n',
     'rest_framework',
     'rest_framework.authtoken',
+    'bootstrap3',
+    'ordered_model'
 )
 
 MIDDLEWARE = (
@@ -106,6 +108,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'base.views.common.common_context_processor',
@@ -122,7 +125,7 @@ DATABASES = {
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'osis'),
         'HOST': os.environ.get("POSTGRES_HOST", '127.0.0.1'),
         'PORT': os.environ.get("POSTGRES_PORT", '5432'),
-        'ATOMIC_REQUEST':  os.environ.get('DATABASE_ATOMIC_REQUEST', 'False').lower() == 'true'
+        'ATOMIC_REQUESTS':  os.environ.get('DATABASE_ATOMIC_REQUEST', 'False').lower() == 'true'
     },
 }
 
@@ -135,6 +138,8 @@ LANGUAGES = [
     ('fr-be', _('French')),
     ('en', _('English')),
 ]
+LANGUAGE_CODE_FR = 'fr-be'
+LANGUAGE_CODE_EN = 'en'
 # You can change default values for internalizations settings in your .env file
 USE_I18N = os.environ.get('USE_I18N', 'True').lower() == 'true'
 USE_L10N = os.environ.get('USE_L10N', 'True').lower() == 'true'
@@ -190,25 +195,10 @@ LOGO_INSTITUTION_URL = os.environ.get('LOGO_INSTITUTION_URL',
                                       os.path.join(BASE_DIR, "base/static/img/logo_institution.jpg"))
 LOGO_OSIS_URL = os.environ.get('LOGO_OSIS_URL', '')
 
-
-# Queues Definition
-# The queue system uses RabbitMq queues to communicate with other application (ex : osis-portal)
-if not TESTING or not SKIP_QUEUES_TESTS:
-    QUEUES = {
-        'QUEUE_URL': os.environ.get('RABBITMQ_HOST', 'localhost'),
-        'QUEUE_USER': os.environ.get('RABBITMQ_USER', 'guest'),
-        'QUEUE_PASSWORD': os.environ.get('RABBITMQ_PASSWORD', 'guest'),
-        'QUEUE_PORT': int(os.environ.get('RABBITMQ_PORT', 5672)),
-        'QUEUE_CONTEXT_ROOT': os.environ.get('RABBITMQ_CONTEXT_ROOT', '/'),
-        'QUEUES_NAME': {
-            'MIGRATIONS_TO_PRODUCE': 'osis_portal',
-            'MIGRATIONS_TO_CONSUME': 'osis',
-            'SCORE_ENCODING_PDF_REQUEST': 'score_encoding_pdf_request',
-            'SCORE_ENCODING_PDF_RESPONSE': 'score_encoding_pdf_response',
-            'APPLICATION_OSIS_PORTAL': 'application_osis_portal',
-            'ATTRIBUTION_RESPONSE': 'attribution_response',
-        }
-    }
+# The Queues are optional
+# They are used to ensure the migration of Data between Osis and other application (ex : Osis <> Osis-Portal)
+# See in settings.dev.example to configure the queues
+QUEUES = {}
 
 # Additionnal Locale Path
 # Add local path in your environment settings (ex: dev.py)
@@ -242,7 +232,16 @@ CKEDITOR_CONFIGS = {
             ['NumberedList', 'BulletedList'],
             ['Link', 'Unlink']
         ]
-    }
+    },
+    'minimal_plus_headers': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Format', 'Styles'],
+            ['Bold', 'Italic', 'Underline'],
+            ['Link', 'Unlink'],
+            ['NumberedList', 'BulletedList']
+        ]
+    },
 }
 
 LOGGING = {
@@ -299,8 +298,31 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
 
-#ESB Configuration
+# ESB Configuration
 ESB_AUTHORIZATION = os.environ.get('ESB_AUTHORIZATION')
 ESB_STUDENT_API = os.environ.get('ESB_STUDENT_API')
 
 RELEASE_TAG = os.environ.get('RELEASE_TAG')
+
+# BOOTSTRAP3 Configuration
+BOOTSTRAP3 = {
+    'set_placeholder': False,
+    'success_css_class': ''
+}
+
+CACHE_ENABLED = os.environ.get("CACHE_ENABLED", 'False').lower() == 'true'
+if CACHE_ENABLED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://" + os.environ.get("REDIS_HOST", '127.0.0.1') + ":"
+                                   + os.environ.get("REDIS_PORT", '6379'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
+                "SOCKET_CONNECT_TIMEOUT": 2,
+                "SOCKET_TIMEOUT": 2,
+            },
+            "KEY_PREFIX": os.environ.get("REDIS_PREFIX", 'osis')
+        }
+}

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,9 +26,10 @@
 from django.utils import timezone
 
 from django.forms import formset_factory, MultiWidget
+from base.forms.utils.datefield import DATETIME_FORMAT
 
 from base.forms.education_groups_administrative_data import AdministrativeDataSessionForm, AdministrativeDataFormSet, \
-    DATETIME_FORMAT, DATE_FORMAT, AdministrativeDataFormset
+    DATE_FORMAT
 from base.models.enums import academic_calendar_type
 from base.models.offer_year_calendar import OfferYearCalendar
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
@@ -45,34 +46,24 @@ class TestAdministrativeDataForm(TestCase):
         self.academic_year = AcademicYearFactory(year=2007)
 
         self.academic_calendars = [
-            AcademicCalendarFactory.build(reference=i[0],
-                                          academic_year=self.academic_year)
+            AcademicCalendarFactory(reference=i[0], academic_year=self.academic_year)
             for i in academic_calendar_type.ACADEMIC_CALENDAR_TYPES
         ]
-
-        for ac in self.academic_calendars:
-            ac.save(functions=[])
 
         self.education_group_year = EducationGroupYearFactory(academic_year=self.academic_year)
 
         self.offer_year = [
-            OfferYearCalendarFactory(education_group_year=self.education_group_year,
-                                     academic_calendar=i)
-            for i in self.academic_calendars
+            OfferYearCalendarFactory(education_group_year=self.education_group_year, academic_calendar=ac)
+            for ac in self.academic_calendars
         ]
 
-        self.session_exam_calendars = []
-        for ac in self.academic_calendars:
-            self.session_exam_calendars.extend(
-                [
-                    SessionExamCalendarFactory(number_session=i, academic_calendar=ac)
-                    for i in range(1, 4)
-                ]
-            )
+        self.session_exam_calendars = [
+            SessionExamCalendarFactory(number_session=1, academic_calendar=ac) for ac in self.academic_calendars
+        ]
 
     def test_initial(self):
-        formset_session = AdministrativeDataFormset(form_kwargs={'education_group_year': self.education_group_year})
-
+        SessionFormSet = formset_factory(form=AdministrativeDataSessionForm, formset=AdministrativeDataFormSet, extra=1)
+        formset_session = SessionFormSet(form_kwargs={'education_group_year': self.education_group_year})
         for form in formset_session:
             for field in form.fields.values():
                 self.assertIsNotNone(field.initial)

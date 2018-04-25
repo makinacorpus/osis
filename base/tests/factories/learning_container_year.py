@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -45,10 +45,12 @@ class LearningContainerYearFactory(factory.django.DjangoModelFactory):
     learning_container = factory.SubFactory(LearningContainerFactory)
     container_type = factory.Iterator(learning_container_year_types.LEARNING_CONTAINER_YEAR_TYPES,
                                       getter=operator.itemgetter(0))
-    title = factory.Sequence(lambda n: 'Learning container year - %d' % n)
+    common_title = factory.Sequence(lambda n: 'Learning container year - %d' % n)
+    common_title_english = factory.Sequence(lambda n: 'Learning container year english - %d' % n)
     acronym = factory.Sequence(lambda n: 'LCY-%d' % n)
     campus = factory.SubFactory(CampusFactory)
     language = factory.SubFactory(LanguageFactory)
     changed = factory.fuzzy.FuzzyDateTime(datetime.datetime(2016, 1, 1, tzinfo=get_tzinfo()),
                                           datetime.datetime(2017, 3, 1, tzinfo=get_tzinfo()))
     in_charge = False
+    type_declaration_vacant = None

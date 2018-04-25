@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,20 +33,20 @@ from base.tests.factories.offer_year import OfferYearFactory
 from osis_common.utils.datetime import get_tzinfo
 
 
-def generate_start_date(offer_year_calendar):
-    if offer_year_calendar.academic_calendar:
-        return datetime.datetime(offer_year_calendar.academic_calendar.start_date.year,
-                                 offer_year_calendar.academic_calendar.start_date.month,
-                                 offer_year_calendar.academic_calendar.start_date.day, tzinfo=get_tzinfo())
+def generate_start_date(abstract_calendar):
+    if abstract_calendar.academic_calendar:
+        return datetime.datetime(abstract_calendar.academic_calendar.start_date.year,
+                                 abstract_calendar.academic_calendar.start_date.month,
+                                 abstract_calendar.academic_calendar.start_date.day, tzinfo=get_tzinfo())
     else:
         return datetime.datetime(2000, 1, 1, tzinfo=get_tzinfo())
 
 
-def generate_end_date(offer_year_calendar):
-    if offer_year_calendar.academic_calendar:
-        return datetime.datetime(offer_year_calendar.academic_calendar.end_date.year,
-                                 offer_year_calendar.academic_calendar.end_date.month,
-                                 offer_year_calendar.academic_calendar.end_date.day,
+def generate_end_date(abstract_calendar):
+    if abstract_calendar.academic_calendar:
+        return datetime.datetime(abstract_calendar.academic_calendar.end_date.year,
+                                 abstract_calendar.academic_calendar.end_date.month,
+                                 abstract_calendar.academic_calendar.end_date.day,
                                  tzinfo=get_tzinfo())
     else:
         return datetime.datetime(2099, 1, 1, tzinfo=get_tzinfo())
@@ -63,5 +63,4 @@ class OfferYearCalendarFactory(factory.django.DjangoModelFactory):
     offer_year = factory.SubFactory(OfferYearFactory)
     start_date = factory.LazyAttribute(generate_start_date)
     end_date = factory.LazyAttribute(generate_end_date)
-    customized = False
     education_group_year = factory.SubFactory(EducationGroupYearFactory)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -57,18 +57,18 @@ class LearningUnitYearWithContextTestCase(TestCase):
                                                                   hourly_volume_partial=-1, planned_classes=1)
         self.entity_component_yr = EntityComponentYearFactory(learning_component_year=self.learning_component_yr,
                                                               entity_container_year=self.entity_container_yr,
-                                                              hourly_volume_total=None)
+                                                              repartition_volume=None)
 
         self.entity_components_yr = [self.entity_component_yr,]
 
     def test_get_floated_only_element_of_list(self):
         a_list = []
         self.assertIsNone(learning_unit_year_with_context._get_floated_only_element_of_list(a_list))
-        self.assertEquals(learning_unit_year_with_context._get_floated_only_element_of_list(a_list, 0), 0)
+        self.assertEqual(learning_unit_year_with_context._get_floated_only_element_of_list(a_list, 0), 0)
 
         a_list = [17]
-        self.assertEquals(learning_unit_year_with_context._get_floated_only_element_of_list(a_list), 17.0)
-        self.assertEquals(type(learning_unit_year_with_context._get_floated_only_element_of_list(a_list)), float)
+        self.assertEqual(learning_unit_year_with_context._get_floated_only_element_of_list(a_list), 17.0)
+        self.assertEqual(type(learning_unit_year_with_context._get_floated_only_element_of_list(a_list)), float)
 
         a_list = [1, 2]
         with self.assertRaisesMessage(ValueError, "The provided list should contain 0 or 1 elements"):
@@ -88,7 +88,7 @@ class LearningUnitYearWithContextTestCase(TestCase):
                                                              ) for x in range(3)]
         components = [EntityComponentYearFactory(entity_container_year=entity_containers_year[x],
                                                  learning_component_year=learning_component_year,
-                                                 hourly_volume_total=x+5
+                                                 repartition_volume=x+5
                                                  ) for x in range(3)]
         wanted_response = {
             "REQUIREMENT_ENTITY": 5,
@@ -100,7 +100,7 @@ class LearningUnitYearWithContextTestCase(TestCase):
                              wanted_response)
 
     def test_volume_learning_component_year(self):
-        self.entity_component_yr.hourly_volume_total = 15
+        self.entity_component_yr.repartition_volume = 15
 
         self.learning_component_yr.hourly_volume_partial = 0
         data = learning_unit_year_with_context.volume_learning_component_year(self.learning_component_yr,

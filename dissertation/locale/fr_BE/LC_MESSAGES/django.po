@@ -23,7 +23,7 @@ msgid "accepted_by_director"
 msgstr "Accepté par le promoteur"
 
 msgid "accepted_by_first_year_evaluation"
-msgstr "Évaluation de première année réussie"
+msgstr "Éval première année ok"
 
 msgid "ACCOMPANIST"
 msgstr "Accompagnateur"
@@ -69,6 +69,9 @@ msgstr "Ajouter un sujet"
 
 msgid "add_proposition_dissertation_jury_member"
 msgstr "Ajouter un membre au jury"
+
+msgid "add_success"
+msgstr "Ajout réussi"
 
 msgid "advanced_search"
 msgstr "Recherche avancée"
@@ -286,6 +289,9 @@ msgstr "Paramétrage de la plateforme"
 msgid "desc_lnk_manager_proposition_dissertations"
 msgstr "Sujets de mémoire proposés par les enseignants"
 
+msgid "desc_lnk_manager_students_list"
+msgstr "Liste des étudiants"
+
 msgid "desc_lnk_propositions_dissertations"
 msgstr "Sujets de mémoire proposés par moi-même et par les autres enseignants"
 
@@ -377,7 +383,7 @@ msgid "error"
 msgstr "Erreur"
 
 msgid "evaluation_first_year"
-msgstr "Évaluation de fin de première année"
+msgstr "Éval fin de 1ère année"
 
 msgid "export_search_as_xls"
 msgstr "Exporter la recherche en XLS"
@@ -539,10 +545,10 @@ msgid "manager_dissertations_to_dir_submit"
 msgstr "Soumettre au promoteur"
 
 msgid "manager_evaluation_accept"
-msgstr "Évaluation de première année réussie"
+msgstr "Éval 1ère année réussie"
 
 msgid "manager_evaluation_refuse"
-msgstr "Évaluation de première année échouée"
+msgstr "Éval de 1ère année échouée"
 
 msgid "manager_informations_add"
 msgstr "Ajouter un enseignant"
@@ -573,6 +579,9 @@ msgstr "Nombre maximum d'étudiants"
 
 msgid "max_students_number"
 msgstr "Nombre indicatif de places pour ce sujet"
+
+msgid "maximum_jury"
+msgstr "Nombre maximum de membre du jury atteints"
 
 msgid "mgr_com_accept_confirmation_message"
 msgstr "Vous allez indiquer l'acceptation de ce mémoire par la commission. Êtes-vous certain de vouloir continuer ?"
@@ -835,6 +844,9 @@ msgstr "Cochez les programmes de cours en relation avec ce sujet"
 msgid "select_program_first"
 msgstr "Choisissez d'abord le Programme/Année de début"
 
+msgid "send_email_to_commission_accepted"
+msgstr "Envoyer un email à la commission de lecture à l'acceptation de la commission d'évaluation"
+
 msgid "september"
 msgstr "Septembre"
 
@@ -846,6 +858,9 @@ msgstr "Statistiques"
 
 msgid "status"
 msgstr "État"
+
+msgid "status_or_adviser_error"
+msgstr "Le statut ou l'enseignant est manquant"
 
 msgid "student_can_manage_readers"
 msgstr "Les étudiants peuvent gérer les lecteurs"
@@ -878,7 +893,7 @@ msgid "submitted_to_director"
 msgstr "Soumis au promoteur"
 
 msgid "submitted_to_first_year_evaluation"
-msgstr "Soumis à l'évaluation de fin de 1è année"
+msgstr "Soumis à l'éval fin de 1ère"
 
 msgid "taken_places"
 msgstr "Places occupées"
@@ -982,5 +997,10 @@ msgstr "oui"
 msgid "yes,no"
 msgstr "oui,non"
 
+msgid "year_start"
+msgstr "Année de début"
+
 msgid "you_have"
 msgstr "Vous avez"
+
+

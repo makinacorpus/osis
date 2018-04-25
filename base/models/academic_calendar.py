@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,21 +25,21 @@
 ##############################################################################
 from django.db import models
 from django.utils import timezone
-from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
-from base.models.exceptions import FunctionArgumentMissingException, StartDateHigherThanEndDateException
-from base.models.enums import academic_calendar_type
 from django.utils.translation import ugettext as _
+
+from base.models import academic_year
+from base.models.enums import academic_calendar_type
+from base.models.exceptions import StartDateHigherThanEndDateException
 from base.models.utils.admin_extentions import remove_delete_action
-
-
-FUNCTIONS = 'functions'
+from base.signals.publisher import compute_all_scores_encodings_deadlines
+from osis_common.models.serializable_model import SerializableModel, SerializableModelAdmin
 
 
 class AcademicCalendarAdmin(SerializableModelAdmin):
     list_display = ('academic_year', 'title', 'start_date', 'end_date')
     list_display_links = None
     readonly_fields = ('academic_year', 'title', 'start_date', 'end_date')
-    list_filter = ('academic_year',)
+    list_filter = ('academic_year', 'reference')
     search_fields = ['title']
     ordering = ('start_date',)
 
@@ -51,6 +51,11 @@ class AcademicCalendarAdmin(SerializableModelAdmin):
 
     def get_actions(self, request):
         return remove_delete_action(super(AcademicCalendarAdmin, self).get_actions(request))
+
+
+class AcademicCalendarQuerySet(models.QuerySet):
+    def current_academic_year(self):
+        return self.filter(academic_year=academic_year.current_academic_year())
 
 
 class AcademicCalendar(SerializableModel):
@@ -67,15 +72,13 @@ class AcademicCalendar(SerializableModel):
     reference = models.CharField(choices=academic_calendar_type.ACADEMIC_CALENDAR_TYPES, max_length=50, blank=True,
                                  null=True)
 
+    objects = AcademicCalendarQuerySet.as_manager()
+
     def save(self, *args, **kwargs):
-        if FUNCTIONS not in kwargs.keys():
-            raise FunctionArgumentMissingException('The kwarg "{0}" must be set.'.format(FUNCTIONS))
-        functions = kwargs.pop(FUNCTIONS)
         self.validation_mandatory_dates()
         self.validation_start_end_dates()
         super(AcademicCalendar, self).save(*args, **kwargs)
-        for function in functions:
-            function(self)
+        compute_all_scores_encodings_deadlines.send(sender=self.__class__, academic_calendar=self)
 
     def validation_start_end_dates(self):
         if self.start_date and self.end_date and self.start_date > self.end_date:
@@ -133,3 +136,29 @@ def get_by_reference_and_academic_year(a_reference, an_academic_year):
         return AcademicCalendar.objects.get(reference=a_reference, academic_year=an_academic_year)
     except AcademicCalendar.DoesNotExist:
         return None
+
+
+def find_academic_calendar(academic_year_id, a_reference, a_date):
+    if academic_year_id and a_reference:
+        return AcademicCalendar.objects.filter(academic_year=academic_year_id,
+                                               reference=a_reference,
+                                               start_date__lte=a_date,
+                                               end_date__gte=a_date).order_by('start_date').first()
+    return None
+
+
+def is_academic_calendar_opened(an_academic_year_id, a_reference):
+    an_academic_calendar = find_academic_calendar(an_academic_year_id,
+                                                  a_reference,
+                                                  timezone.now())
+    if an_academic_calendar:
+        return True
+    return False
+
+
+def find_dates_for_current_academic_year(reference):
+    try:
+        return AcademicCalendar.objects.current_academic_year().filter(reference=reference).\
+            values("start_date", "end_date").get()
+    except AcademicCalendar.DoesNotExist:
+        return {}

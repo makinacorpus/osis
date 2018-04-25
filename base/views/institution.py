@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,14 +24,26 @@
 #
 ##############################################################################
 import json
-import datetime
+import logging
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.utils.translation import ugettext_lazy as _
+
 from base import models as mdl
+from base.business.institution import can_user_edit_educational_information_submission_dates_for_entity
+from base.forms.entity import EntitySearchForm
+from base.forms.entity_calendar import EntityCalendarEducationalInformationForm
 from base.models import entity_version as entity_version_mdl
-from base.models.enums import entity_type
+from base.models.entity_version import EntityVersion
+from base.views.common import display_success_messages
 from . import layout
+
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 @login_required
@@ -52,27 +64,42 @@ def academic_actors(request):
 
 
 @login_required
-def entities(request):
-    return layout.render(request, "entities.html", {'init': "0",
-                                                    'types': entity_type.ENTITY_TYPES})
-
-
-@login_required
 def entities_search(request):
-    entities_version = mdl.entity_version.search_entities(acronym=request.GET.get('acronym'),
-                                                          title=request.GET.get('title'),
-                                                          type=request.GET.get('type_choices'),
-                                                          with_entity=True)
-    return layout.render(request, "entities.html", {'entities_version': entities_version,
-                                                    'init': "1",
-                                                    'types': entity_type.ENTITY_TYPES})
+    order_by = request.GET.get('order_by', 'acronym')
+    form = EntitySearchForm(request.GET or None)
+
+    entities_version_list = form.get_entities().order_by(order_by)
+
+    paginator = Paginator(entities_version_list, 20)
+    page = request.GET.get('page', 1)
+    try:
+        entities_version_list = paginator.page(page)
+    except PageNotAnInteger:
+        entities_version_list = paginator.page(1)
+    except EmptyPage:
+        entities_version_list = paginator.page(paginator.num_pages)
+
+    return render(request, "entities.html", {'entities_version': entities_version_list, 'form': form})
 
 
 @login_required
 def entity_read(request, entity_version_id):
-    entity_version = mdl.entity_version.find_by_id(entity_version_id)
+    entity_version = get_object_or_404(EntityVersion, id=entity_version_id)
+    can_user_post = can_user_edit_educational_information_submission_dates_for_entity(request.user,
+                                                                                      entity_version.entity)
+    if request.method == "POST" and not can_user_post:
+        logger.warning("User {} has no sufficient right to modify submission dates of educational information.".
+                       format(request.user))
+        raise PermissionDenied()
+
     entity_parent = entity_version.get_parent_version()
     descendants = entity_version.descendants
+
+    form = EntityCalendarEducationalInformationForm(entity_version, request.POST or None)
+    if form.is_valid():
+        display_success_messages(request, _("Educational information submission dates updated"))
+        form.save_entity_calendar(entity_version.entity)
+
     return layout.render(request, "entity/identification.html", locals())
 
 

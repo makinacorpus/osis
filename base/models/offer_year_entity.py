@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,16 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.contrib import admin
 from django.core.exceptions import ObjectDoesNotExist
-
-from base.models.enums import offer_year_entity_type
 from django.db import models
 
+from base.models.enums import offer_year_entity_type
+from base.models.osis_model_admin import OsisModelAdmin
 
-class OfferYearEntityAdmin(admin.ModelAdmin):
+
+class OfferYearEntityAdmin(OsisModelAdmin):
     list_display = ('offer_year', 'entity', 'type', 'education_group_year')
-    fieldsets = ((None, {'fields': ('offer_year', 'entity', 'type', 'education_group_year')}),)
     search_fields = ['type', 'entity__entityversion__acronym', 'offer_year__acronym', 'education_group_year__acronym']
     list_filter = ('type', 'offer_year__academic_year',)
     raw_id_fields = ('offer_year', 'entity', 'education_group_year')
@@ -74,18 +73,14 @@ def search(**kwargs):
     return queryset
 
 
-def get_from_offer_year_and_type(offer_year, type):
+def get_from_offer_year_and_type(offer_year, education_group_type):
     try:
-        return OfferYearEntity.objects.get(offer_year=offer_year, type=type)
+        return OfferYearEntity.objects.get(offer_year=offer_year, type=education_group_type)
     except ObjectDoesNotExist:
         return None
 
 
-def find_by_education_group_year(education_group_yr, typ):
-    return OfferYearEntity.objects.filter(education_group_year=education_group_yr, type=typ)
-
-
-def find_by_education_group_year_first(education_group_yr, typ):
-    results = find_by_education_group_year(education_group_yr, typ)
+def find_by_education_group_year_first(education_group_yr, education_group_type):
+    results = search(education_group_year=education_group_yr, type=education_group_type)
     if results:
         return results.first()

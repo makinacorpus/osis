@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@
 #
 ##############################################################################
 from django.db import models
+from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from osis_common.models.auditable_model import AuditableModelAdmin, AuditableModel
 from attribution.models.enums import function
 
 
-class TutorApplicationAdmin(AuditableModelAdmin):
+class TutorApplicationAdmin(admin.ModelAdmin):
     list_display = ('tutor', 'function', 'learning_container_year', 'volume_lecturing', 'volume_pratical_exercice', 'changed')
     list_filter = ('learning_container_year__academic_year', )
     fieldsets = ((None, {'fields': ('last_changed', 'learning_container_year',
@@ -48,7 +48,7 @@ class TutorApplicationAdmin(AuditableModelAdmin):
     publish_application_to_portal.short_description = _("publish_application_to_portal")
 
 
-class TutorApplication(AuditableModel):
+class TutorApplication(models.Model):
     external_id = models.CharField(max_length=100, blank=True, null=True)
     changed = models.DateTimeField(null=True, auto_now=True)
     learning_container_year = models.ForeignKey('base.LearningContainerYear')
@@ -59,9 +59,6 @@ class TutorApplication(AuditableModel):
     remark = models.TextField(blank=True, null=True)
     course_summary = models.TextField(blank=True, null=True)
     last_changed = models.DateTimeField(null=True)
-
-    class Meta:
-        unique_together = ('learning_container_year', 'tutor', 'function')
 
     def __str__(self):
         return u"%s - %s" % (self.tutor, self.function)

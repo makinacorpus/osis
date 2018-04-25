@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,18 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
-from django.shortcuts import get_object_or_404, redirect
+from dissertation.models import adviser
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from base.models.student import find_by_offer_year
 from base.models.offer_year import OfferYear
 from django.contrib.auth.decorators import user_passes_test
-from dissertation.models.adviser import is_manager
 from django.http import JsonResponse
+MAX_RETURN = 50
 
 
 @login_required
-@user_passes_test(is_manager)
+@user_passes_test(adviser.is_manager)
 def get_students_list_in_offer_year(request, offer_year_start_id):
     offer_year_start = get_object_or_404(OfferYear, pk=offer_year_start_id)
     students_list = find_by_offer_year(offer_year_start)
@@ -50,3 +50,12 @@ def get_students_list_in_offer_year(request, offer_year_start_id):
         data = False
 
     return JsonResponse({'res': data})
+
+
+@login_required
+@user_passes_test(adviser.is_manager)
+def find_adviser_list_json(request):
+    term_search = request.GET.get('term')
+    advisers = adviser.find_advisers_last_name_email(term_search, MAX_RETURN)
+    response_data = adviser.convert_advisers_to_array(advisers)
+    return JsonResponse(response_data, safe=False)

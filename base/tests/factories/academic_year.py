@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,42 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import factory
-import factory.fuzzy
-import string
 import datetime
+import string
+from base.models.academic_year import AcademicYear
+
+import factory.fuzzy
 from django.utils import timezone
 from factory.django import DjangoModelFactory
 from faker import Faker
+
 from osis_common.utils.datetime import get_tzinfo
+
 fake = Faker()
+
+
+def create_current_academic_year():
+    now = datetime.datetime.now()
+    ref_date = datetime.datetime(now.year, 9, 15)
+    if now < ref_date:
+        start_date = datetime.date(now.year-1, 9, 15)
+    else:
+        start_date = datetime.date(now.year, 9, 15)
+
+    return AcademicYearFakerFactory(year=start_date.year,
+                                    start_date=start_date,
+                                    end_date=datetime.date(start_date.year+1, start_date.month, 30)
+                                    )
+
+
+def get_current_year():
+    now = datetime.datetime.now()
+    ref_date = datetime.datetime(now.year, 9, 15)
+    if now < ref_date:
+        start_date = datetime.date(now.year-1, 9, 15)
+    else:
+        start_date = datetime.date(now.year, 9, 15)
+    return start_date.year
 
 
 class AcademicYearFactory(DjangoModelFactory):
@@ -54,6 +81,15 @@ class AcademicYearFactory(DjangoModelFactory):
         while i < quantity:
             AcademicYearFactory(year=from_year-i)
             i += 1
+
+    @staticmethod
+    def produce_in_future(current_year, quantity=10):
+        i = 1
+        academic_years = []
+        while i < quantity+1:
+            academic_years.append(AcademicYearFactory.build(year=current_year + i))
+            i += 1
+        AcademicYear.objects.bulk_create(academic_years)
 
 
 class AcademicYearFakerFactory(DjangoModelFactory):

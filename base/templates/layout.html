@@ -10,7 +10,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2017 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2018 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
 
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     {% analytical_head_top %}
     <meta charset="utf-8">
@@ -46,8 +46,20 @@
     <link rel="stylesheet" href="{% static 'css/osis.css' %}?version={{ js }}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/tree.css' %}">
-    <link rel="stylesheet" href="{% static 'css/jquery.treeview.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jstree.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/dataTables.bootstrap.min.css' %}">
+
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/osis.js' %}?version={{ js }}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/diacritics-sort.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jstree.min.js' %}"></script>
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     {% block header %}
     <noscript>
       <meta http-equiv="refresh" content="0;url={% url 'noscript' %}">
@@ -235,10 +247,11 @@
             {% endblock %}
         {% endif %}
         {% if experimental_phase %}
-            <div class="alert alert-warning">
-                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>{% trans 'experimental_phase' %}.
+            <div class="alert alert-warning" style="margin-bottom: 10px;">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans 'experimental_phase' %}.
             </div>
         {% endif %}
+        {% include "template_messages.html" %}
         {% block content %}
         {% endblock %}
         <br>
@@ -265,16 +278,6 @@
         </div>
     </nav>
 
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/osis.js' %}?version={{ js }}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
-    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery-validation/jquery.validate.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/diacritics-sort.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery.treeview.js' %}"></script>
     {% block script %}
     {% endblock %}
     {% analytical_body_bottom %}
