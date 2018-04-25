@@ -95,15 +95,17 @@ class TestLearningUnitYearModelFormSave(TestCase):
         self.faculty_manager = PersonFactory()
         self.faculty_manager.user.groups.add(Group.objects.get(name=FACULTY_MANAGER_GROUP))
 
+        self.current_academic_year = create_current_academic_year()
+
         self.learning_container = LearningContainerFactory()
         self.learning_unit = LearningUnitFactory(learning_container=self.learning_container)
         self.learning_container_year = LearningContainerYearFactory(learning_container=self.learning_container,
-                                                                    container_type=learning_container_year_types.COURSE)
+                                                                    container_type=learning_container_year_types.COURSE,
+                                                                    academic_year=self.current_academic_year)
         self.form = LearningUnitYearModelForm(data=None, person=self.central_manager, subtype=FULL)
         self.learning_unit_year_to_update = LearningUnitYearFactory(
             learning_unit=self.learning_unit, learning_container_year=self.learning_container_year)
 
-        self.current_academic_year = create_current_academic_year()
         self.post_data = {
             'acronym_0': 'L',
             'acronym_1': 'OSIS9001',

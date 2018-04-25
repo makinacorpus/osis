@@ -30,6 +30,13 @@
     <div class="row" style="margin-top:10px;">
         <div class="col-md-2">
             <label>{% trans 'learning_achievements' %}</label>
+            {% if not achievements_FR %}
+                <a class="achievement-edit-btn" href="#"
+                   data-form="{% url 'achievement_create_first' learning_unit_year_id=learning_unit_year.id %}?language_code=FR"
+                   title="{% trans 'create' %}">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>
+            {% endif %}
         </div>
         <div class="col-md-10">
             {% if achievements_FR %}
@@ -55,22 +62,18 @@
                 <table class="pull-right" style="margin: 10px;">
                     <tr>
                         <td width="33%">
-                            {% if forloop.counter0 > 0 %}
-                                <button type="submit" title="{% trans 'up' %}"  class="btn btn-default btn-sm"
-                                        id="btn_operation_up_{{ achievement.id }}"
-                                        name="action" value="up">
-                                    <i class="fa fa-arrow-up"></i>
-                                </button>
-                            {% endif %}
+                            <button type="submit" title="{% trans 'up' %}"  class="btn btn-default btn-sm"
+                                    id="btn_operation_up_{{ achievement.id }}"
+                                    name="action" value="up" {% if forloop.counter0 == 0 %}disabled{% endif %} >
+                                <i class="fa fa-arrow-up"></i>
+                            </button>
                         </td>
                         <td width="33%">
-                            {% if not forloop.last %}
-                                <button type="submit" title="{% trans 'down' %}" class="btn btn-default btn-sm"
-                                        id="btn_operation_down_{{ achievement.id }}"
-                                        name="action" value="down">
-                                    <i class="fa fa-arrow-down"></i>
-                                </button>
-                            {% endif %}
+                            <button type="submit" title="{% trans 'down' %}" class="btn btn-default btn-sm"
+                                    id="btn_operation_down_{{ achievement.id }}"
+                                    name="action" value="down" {% if forloop.last %}disabled{% endif %}>
+                                <i class="fa fa-arrow-down"></i>
+                            </button>
                         </td>
                         <td width="33%">
                             <button type="submit" title="{% trans 'delete' %}"  class="btn btn-default btn-sm"
@@ -91,39 +94,62 @@
                         </a>
                         {{ achievement.code_name }}
                     </div>
-                    <div class="col-md-4 collapsable_{{ forloop.counter0 }}">{{ achievement.text|safe }}</div>
+                    <div class="col-md-4 collapsable_{{ forloop.counter0 }}">{{ achievement.text| default_if_none:''|safe }}</div>
                     <div class="col-md-1">
                         {% if perms.base.can_edit_learningunit_specification %}
-                            <a class="achievement-edit-btn pull-right" href="#"
+                            <a class="achievement-edit-btn" href="#"
                                data-form="{% url 'achievement_edit' learning_unit_year_id=learning_unit_year.id learning_achievement_id=achievement.id %}"
                                title="{% trans 'edit' %}">
                                 <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                             </a>
+                            {% if forloop.last %}
+                                <a class="achievement-edit-btn" href="#"
+                                   data-form="{% url 'achievement_create' learning_unit_year_id=learning_unit_year.id learning_achievement_id=achievement.id %}?language_code=FR"
+                                   title="{% trans 'create' %}">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </a>
+                            {% endif %}
                         {% endif %}
                     </div>
                     <div class="col-md-5 collapsable_{{ forloop.counter0 }}">
                         {% with achievement_en=achievements_EN|index:forloop.counter0 %}
                             {% if achievement_en %}
-                                {{ achievement_en.text|safe }}
+                                {{ achievement_en.text| default_if_none:''|safe }}
                             {% endif %}
                         {% endwith %}
                     </div>
                     <div class="col-md-1">
                         {% if perms.base.can_edit_learningunit_specification %}
-                            {% with achievement_en=achievements_EN|index:forloop.counter0 %}
-                                {% if achievement_en %}
-                                    <a class="achievement-edit-btn pull-right" href="#"
-                                       data-form="{% url 'achievement_edit' learning_unit_year_id=learning_unit_year.id learning_achievement_id=achievement_en.id %}"
-                                       title="{% trans 'edit' %}">
-                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-                                    </a>
-                                {% endif %}
-                            {% endwith %}
+                            {% if  achievements_EN%}
+                                {% with achievement_en=achievements_EN|index:forloop.counter0 %}
+                                    {% if achievement_en %}
+                                        <a class="achievement-edit-btn" href="#"
+                                           data-form="{% url 'achievement_edit' learning_unit_year_id=learning_unit_year.id learning_achievement_id=achievement_en.id %}"
+                                           title="{% trans 'edit' %}">
+                                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                        </a>
+                                        {% if forloop.counter == achievements_EN|length and not forloop.last %}
+                                            <a class="achievement-edit-btn" href="#"
+                                               data-form="{% url 'achievement_create' learning_unit_year_id=learning_unit_year.id learning_achievement_id=achievement.id %}?language_code=EN"
+                                               title="{% trans 'create' %}">
+                                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <a class="achievement-edit-btn" href="#"
+                                   data-form="{% url 'achievement_create' learning_unit_year_id=learning_unit_year.id learning_achievement_id=achievement.id %}?language_code=EN"
+                                   title="{% trans 'create' %}">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+        <hr>
     {% endfor %}
 </form>
 <div class="modal fade" id="achievement_edit" role="dialog" data-backdrop="static"></div>

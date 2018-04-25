@@ -52,7 +52,6 @@ from base.models.enums import organization_type, entity_type, \
 from base.models.enums.proposal_state import ProposalState
 from base.models.enums.proposal_type import ProposalType
 from base.models.person import CENTRAL_MANAGER_GROUP, FACULTY_MANAGER_GROUP
-from base.models.proposal_learning_unit import ProposalLearningUnit
 from base.tests.factories import academic_year as academic_year_factory, campus as campus_factory, \
     organization as organization_factory
 from base.tests.factories.academic_year import AcademicYearFakerFactory, create_current_academic_year, get_current_year, \

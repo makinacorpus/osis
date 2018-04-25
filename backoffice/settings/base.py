@@ -322,6 +322,7 @@ if CACHE_ENABLED:
                 "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
                 "SOCKET_CONNECT_TIMEOUT": 2,
                 "SOCKET_TIMEOUT": 2,
+                "PASSWORD": os.environ.get("REDIS_PASSWORD", "")
             },
             "KEY_PREFIX": os.environ.get("REDIS_PREFIX", 'osis')
         }

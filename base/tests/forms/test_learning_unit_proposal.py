@@ -25,7 +25,6 @@
 ##############################################################################
 import datetime
 from decimal import Decimal
-from unittest import skip
 
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
@@ -37,6 +36,7 @@ from base.models.entity_container_year import EntityContainerYear
 from base.models.enums import organization_type, proposal_type, proposal_state, entity_type, \
     learning_container_year_types, learning_unit_year_quadrimesters, entity_container_year_link_type, \
     learning_unit_periodicity, internship_subtypes, learning_unit_year_subtypes
+from base.models.enums.proposal_state import ProposalState
 from base.models.person import FACULTY_MANAGER_GROUP, CENTRAL_MANAGER_GROUP
 from base.tests.factories.academic_year import create_current_academic_year
 from base.tests.factories.campus import CampusFactory
@@ -48,6 +48,7 @@ from base.tests.factories.learning_unit_year import LearningUnitYearFakerFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_entity import PersonEntityFactory
+from base.tests.factories.proposal_learning_unit import ProposalLearningUnitFactory
 from reference.tests.factories.language import LanguageFactory
 
 PROPOSAL_TYPE = proposal_type.ProposalType.TRANSFORMATION_AND_MODIFICATION.name
@@ -121,6 +122,15 @@ class TestSave(TestCase):
         self.person.user.groups.add(Group.objects.get(name=CENTRAL_MANAGER_GROUP))
         form = ProposalBaseForm(self.form_data, self.person, self.learning_unit_year)
         self.assertFalse(form.fields['state'].disabled)
+
+    def test_learning_unit_proposal_form_get_as_central_manager_with_instance(self):
+        self.person.user.groups.add(Group.objects.get(name=CENTRAL_MANAGER_GROUP))
+        proposal = ProposalLearningUnitFactory(
+            learning_unit_year=self.learning_unit_year, state=ProposalState.FACULTY.name,
+            entity=self.entity_version.entity)
+        form = ProposalBaseForm(self.form_data, self.person,  self.learning_unit_year, proposal=proposal)
+        self.assertFalse(form.fields['state'].disabled)
+        self.assertEqual(form.fields['state'].initial, ProposalState.FACULTY.name)
 
     def test_learning_unit_year_update(self):
         form = ProposalBaseForm(self.form_data, self.person, self.learning_unit_year)

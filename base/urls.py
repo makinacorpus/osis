@@ -135,7 +135,13 @@ urlpatterns = [
             ])),
             url(r'^achievements/', include([
                 url(r'^management/', learning_achievement.management, name="achievement_management"),
-                url(r'^(?P<learning_achievement_id>[0-9]+)/edit/', learning_achievement.edit, name="achievement_edit"),
+                url(r'^(?P<learning_achievement_id>[0-9]+)/edit/', learning_achievement.update,
+                    name="achievement_edit"),
+                url(r'^create/', learning_achievement.create_first,
+                    name="achievement_create_first"),
+
+                url(r'^(?P<learning_achievement_id>[0-9]+)/create/', learning_achievement.create,
+                    name="achievement_create"),
 
             ])),
         ])),

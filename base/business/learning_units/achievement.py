@@ -23,39 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from ckeditor.widgets import CKEditorWidget
-from django import forms
-
-from base.models.learning_achievement import LearningAchievement, search, find_learning_unit_achievement
-from reference.models import language
-
-EN_CODE_LANGUAGE = 'EN'
-FR_CODE_LANGUAGE = 'FR'
+from base.models.learning_achievement import LearningAchievement, find_learning_unit_achievement
 
 
-class LearningAchievementEditForm(forms.ModelForm):
-    text = forms.CharField(widget=CKEditorWidget(config_name='minimal'), required=False)
-
-    class Meta:
-        model = LearningAchievement
-        fields = ['code_name', 'text']
-
-    def __init__(self, data=None, initial=None, **kwargs):
-        initial = initial or {}
-
-        if data and data.get('language_code'):
-            initial['language'] = language.find_by_code(data.get('language_code'))
-
-        super().__init__(data, initial=initial, **kwargs)
-
-        for key, value in initial.items():
-            setattr(self.instance, key, value)
-
-    def save(self, commit=True):
-        instance = super().save(commit)
-        learning_achievement_other_language = search(self.instance.learning_unit_year,
-                                                     self.instance.order)
-        if learning_achievement_other_language:
-            learning_achievement_other_language.update(code_name=self.instance.code_name)
-
-        return instance
+def get_code_name(previous_achievement_fr, a_language_code):
+    if not LearningAchievement.objects.filter(
+            language__code=a_language_code,
+            learning_unit_year=previous_achievement_fr.learning_unit_year).exists():
+        return previous_achievement_fr.code_name
+    else:
+        achievement_fr_next = find_learning_unit_achievement(previous_achievement_fr.learning_unit_year,
+                                                             previous_achievement_fr.language.code,
+                                                             previous_achievement_fr.order + 1)
+        return achievement_fr_next.code_name if achievement_fr_next else ''

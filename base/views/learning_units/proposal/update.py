@@ -133,4 +133,5 @@ def _get_initial(learning_unit_year, proposal, user_person, proposal_type=Propos
     }
     if proposal:
         initial['type'] = proposal.type
+        initial['state'] = proposal.state
     return initial
