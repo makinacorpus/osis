@@ -173,6 +173,12 @@
             <span class="error">{{ form.confidential.errors }}</span>
             <label style="font-size:10px">{% trans form.confidential.help_text %}</label>
         </div>
+        {% if current_reviewer.role in reviewer_role.VICE_RECTOR %}
+            <div class="form-group">
+                {% trans 'comment_vice_rector' %}
+                {{ form.comment_vice_rector }}
+            </div>
+        {% endif %}
         <button type="submit" class="btn btn-primary" title="{% trans 'save'%}" id="bt_mandate_save"
                 name="save"><span class="glyphicon glyphicon-save" aria-hidden="true">
         </span> {% trans 'save'%}</button>

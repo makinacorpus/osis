@@ -114,6 +114,7 @@ def review_edit(request):
                                                 'entity': entity,
                                                 'menu': menu,
                                                 'menu_type': 'reviewer_menu',
+                                                'reviewer_role' : reviewer_role,
                                                 'form': form})
 
 
