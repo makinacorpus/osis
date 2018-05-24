@@ -40,13 +40,13 @@ class AssistantMandate(models.Model):
     fulltime_equivalent = models.DecimalField(max_digits=3, decimal_places=2)
     entry_date = models.DateField()
     end_date = models.DateField()
-    position_id = models.CharField(max_length=12)
     sap_id = models.CharField(max_length=12)
     assistant_type = models.CharField(max_length=20, choices=assistant_type.ASSISTANT_TYPES,
                                       default=assistant_type.ASSISTANT)
     scale = models.CharField(max_length=3)
     absences = models.TextField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
+    comment_vice_rector = models.TextField(null=True, blank=True)
     other_status = models.CharField(max_length=50, null=True, blank=True)
     renewal_type = models.CharField(max_length=12, choices=assistant_mandate_renewal.ASSISTANT_MANDATE_RENEWAL_TYPES,
                                     default=assistant_mandate_renewal.NORMAL)

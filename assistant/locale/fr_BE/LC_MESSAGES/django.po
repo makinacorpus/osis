@@ -142,6 +142,9 @@ msgstr "Le nombre de colonnes est erroné."
 msgid "comment"
 msgstr "Commentaire"
 
+msgid "comment_vice_rector"
+msgstr "Commentaire DAS/CAS - Vice-Recteur"
+
 msgid "CONDITIONAL"
 msgstr "Conditionnel"
 
